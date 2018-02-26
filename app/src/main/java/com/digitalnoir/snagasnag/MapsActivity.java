@@ -3,7 +3,6 @@ package com.digitalnoir.snagasnag;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,9 +10,9 @@ import android.content.IntentSender;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -28,6 +27,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -63,10 +63,12 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<List<Sizzle>>,
@@ -119,6 +121,11 @@ public class MapsActivity extends AppCompatActivity implements
      */
     private ImageButton mAddBtn;
 
+    private View addSizzlePopup;
+
+    private Button addSizzleAlertBtn;
+
+    private ImageButton cancelBtn;
 
     /* *************************************************************************************
      * Below is all declarations for Location service
@@ -247,14 +254,29 @@ public class MapsActivity extends AppCompatActivity implements
         });
 
         mAddBtn = (ImageButton) findViewById(R.id.addBtn);
+        addSizzlePopup = findViewById(R.id.addSizzlePopup);
+        addSizzleAlertBtn = (Button) findViewById(R.id.addSizzleAlertBtn);
+        cancelBtn = (ImageButton) findViewById(R.id.cancelBtn);
+
+
+
         mAddBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                final Dialog fbDialogue = new Dialog(MapsActivity.this, android.R.style.Theme_Black_NoTitleBar);
-                fbDialogue.getWindow().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
-                fbDialogue.setContentView(R.layout.add_sizzle);
-                fbDialogue.setCancelable(true);
-                fbDialogue.show();
+
+                mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
+                addSizzleAlertBtn.setVisibility(View.VISIBLE);
+
+            }
+        });
+
+
+        cancelBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+
+                addSizzlePopup.setVisibility(View.GONE);
+
             }
         });
 
@@ -358,6 +380,7 @@ public class MapsActivity extends AppCompatActivity implements
         mMap.setOnMarkerClickListener(this);
         // Set listener for my location icon
         mMap.setOnMyLocationClickListener(this);
+        mMap.setOnMapLongClickListener(this);
         enableMyLocation();
     }
 
@@ -406,7 +429,55 @@ public class MapsActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onMapLongClick(LatLng latLng) {
+    public void onMapLongClick(LatLng arg0) {
+
+        addSizzlePopup.setVisibility(View.VISIBLE);
+        mAddBtn.setImageResource(R.drawable.ic_add_snag);
+        addSizzleAlertBtn.setVisibility(View.GONE);
+
+        Toast.makeText(getApplicationContext(),
+                "New marker added@" + arg0.toString(), Toast.LENGTH_LONG)
+                .show();
+        // make the marker icons bigger
+        Bitmap resizedBitmap = resizeBitmap(R.drawable.ic_snag_pin);
+
+        mMap.addMarker(new MarkerOptions()
+                .position(arg0)
+                .title("selected location")
+                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap)));
+
+        Double lati = (arg0.latitude);
+        Double loni = (arg0.longitude);
+
+        Geocoder myGeo = new Geocoder(getApplicationContext(), Locale.getDefault());
+        String address = null;
+        String city;
+        String state;
+        String country;
+        String postalCode;
+        String knownName;
+
+        try {
+            List<Address> myAddresses = myGeo.getFromLocation(lati, loni, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+
+            if (myAddresses != null && myAddresses.size() > 0) {
+
+                address = myAddresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                city = myAddresses.get(0).getLocality();
+                state = myAddresses.get(0).getAdminArea();
+                country = myAddresses.get(0).getCountryName();
+                postalCode = myAddresses.get(0).getPostalCode();
+                knownName = myAddresses.get(0).getFeatureName(); // Only if available else return NULL
+
+            } else {
+
+                address = "";
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+Log.d("trien", address);
 
     }
 
@@ -431,7 +502,7 @@ public class MapsActivity extends AppCompatActivity implements
                 // is not null.
                 setLastLocation((Location) savedInstanceState.getParcelable(KEY_LOCATION));
                 // Move camera to the last known location
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
+//                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
             }
 
             // Update the value of mLastUpdateTime from the Bundle and update the UI.
@@ -715,6 +786,7 @@ public class MapsActivity extends AppCompatActivity implements
         } else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);
         }
     }
 
@@ -831,4 +903,6 @@ public class MapsActivity extends AppCompatActivity implements
                 Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(actionStringId), listener).show();
     }
+
+
 }

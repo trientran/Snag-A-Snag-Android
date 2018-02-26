@@ -1,8 +1,10 @@
 <resources>
+    <!--    Main app strings    -->
     <string name="app_name">Snag A Snag</string>
     <string name="title_activity_maps">Map</string>
     <string name="settings">Settings</string>
 
+    <!--    Location permission    -->
     <string name="permission_denied_explanation">Permission was denied, but is needed for core functionality.</string>
     <string name="permission_rationale">Location permission is needed for core functionality</string>
     <string name="permission_rationale_location">Access to the location service is required to show your current location on the map.</string>
@@ -11,4 +13,16 @@
         permission has been permanently denied, it can be enabled from the
         System Settings &gt; Apps &gt; \'Snag a Snag\'.</string>
     <string name="permission_required_toast">Location permission is required for this feature.</string>
+
+    <!--    Add sizzle   -->
+    <string name="add_a_sizzle">Add A Sizzle</string>
+    <string name="add_sizzle_note">The sizzle is marked at your location (You can move the marker around)</string>
+    <string name="hint_sizzle_name">Sizzle name</string>
+    <string name="hint_sizzle_address">Address</string>
+    <string name="hint_sizzle_desc">Description</string>
+    <string name="add_a_snag_cover_photo">Add a Snag cover photo</string>
+    <string name="snag_it">Snag It</string>
+    <string name="add_sizzle_alert">Select and hold the sizzle location</string>
+    <string name="lets_snag">Let\'s snag</string>
+    <string name="snag_a_snag">Snag-A-Snag</string>
 </resources>
