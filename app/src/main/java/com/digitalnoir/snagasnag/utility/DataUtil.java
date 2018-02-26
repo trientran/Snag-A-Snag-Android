@@ -28,6 +28,13 @@ public class DataUtil {
     /** Tag for the log messages */
     private static final String LOG_TAG = DataUtil.class.getSimpleName();
 
+    /**
+     * Base URL for sizzle data from the web service
+     */
+    public static final String SIZZLE_BASE_URL =
+            "http://snag.digitalnoirtest.net.au/";
+
+
     /** Default constructor */
     private DataUtil() {
     }

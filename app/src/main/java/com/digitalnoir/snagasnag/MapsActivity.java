@@ -14,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -31,6 +32,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.digitalnoir.snagasnag.utility.LogUtils;
 import com.digitalnoir.snagasnag.utility.PermissionUtils;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -70,6 +72,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.digitalnoir.snagasnag.utility.DataUtil.SIZZLE_BASE_URL;
+
 public class MapsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<List<Sizzle>>,
         GoogleMap.OnMarkerClickListener,
@@ -83,12 +87,6 @@ public class MapsActivity extends AppCompatActivity implements
      * Tag for log messages
      */
     private static final String LOG_TAG = MapsActivity.class.getName();
-
-    /**
-     * URL for sizzle data from the web service
-     */
-    private static final String SIZZLE_BASE_URL =
-            "http://snag.digitalnoirtest.net.au/";
 
     /**
      * List of sizzles
@@ -123,9 +121,11 @@ public class MapsActivity extends AppCompatActivity implements
 
     private View addSizzlePopup;
 
-    private Button addSizzleAlertBtn;
 
     private ImageButton cancelBtn;
+
+    private ImageButton refreshBtn;
+    private Button addSizzleAlertBtn;
 
     /* *************************************************************************************
      * Below is all declarations for Location service
@@ -258,11 +258,11 @@ public class MapsActivity extends AppCompatActivity implements
         addSizzleAlertBtn = (Button) findViewById(R.id.addSizzleAlertBtn);
         cancelBtn = (ImageButton) findViewById(R.id.cancelBtn);
 
+        refreshBtn = (ImageButton) findViewById(R.id.refreshBtn);
 
-
-        mAddBtn.setOnClickListener(new View.OnClickListener(){
+        mAddBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
 
                 mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
                 addSizzleAlertBtn.setVisibility(View.VISIBLE);
@@ -270,12 +270,14 @@ public class MapsActivity extends AppCompatActivity implements
             }
         });
 
-
-        cancelBtn.setOnClickListener(new View.OnClickListener(){
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
 
                 addSizzlePopup.setVisibility(View.GONE);
+                refreshBtn.setVisibility(View.VISIBLE);
+                mMyLocationBtn.setVisibility(View.VISIBLE);
+
 
             }
         });
@@ -339,7 +341,7 @@ public class MapsActivity extends AppCompatActivity implements
 
         // create new SizzleLoader instance to kick off loading data on background thread
         String allSizzleURL = (new StringBuilder()).append(SIZZLE_BASE_URL).append("snag-display-sizzle/").toString();
-        String a = "df" + "dfd";
+
         return new SizzleLoader(this, allSizzleURL);
     }
 
@@ -429,25 +431,32 @@ public class MapsActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onMapLongClick(LatLng arg0) {
+    public void onMapLongClick(LatLng latLng) {
 
         addSizzlePopup.setVisibility(View.VISIBLE);
         mAddBtn.setImageResource(R.drawable.ic_add_snag);
         addSizzleAlertBtn.setVisibility(View.GONE);
+        refreshBtn.setVisibility(View.GONE);
+        mMyLocationBtn.setVisibility(View.GONE);
 
-        Toast.makeText(getApplicationContext(),
-                "New marker added@" + arg0.toString(), Toast.LENGTH_LONG)
-                .show();
-        // make the marker icons bigger
-        Bitmap resizedBitmap = resizeBitmap(R.drawable.ic_snag_pin);
+        // Style the marker icon
+        Bitmap resizedBitmap = resizeBitmap(R.drawable.ic_snag_pin_yellow);
 
         mMap.addMarker(new MarkerOptions()
-                .position(arg0)
+                .position(latLng)
                 .title("selected location")
                 .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap)));
 
-        Double lati = (arg0.latitude);
-        Double loni = (arg0.longitude);
+        // move camera to the selected location. latitude * 1.000050932 is to move the camera and
+        // marker to the top of Creat Sizzle popup window
+        double newLat = latLng.latitude * 1.000050932;
+        LatLng newLatLng = new LatLng(newLat, latLng.longitude);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(newLatLng, 17);
+        // mMap.animateCamera(cameraUpdate); // this can be used to animate the camera smoothly
+        mMap.moveCamera(cameraUpdate);
+
+        Double lati = (latLng.latitude);
+        Double loni = (latLng.longitude);
 
         Geocoder myGeo = new Geocoder(getApplicationContext(), Locale.getDefault());
         String address = null;
@@ -477,7 +486,8 @@ public class MapsActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
 
-Log.d("trien", address);
+        LogUtils.debug("addressSnag", address);
+        LogUtils.debug("latlongSnag", latLng.toString());
 
     }
 
@@ -512,7 +522,6 @@ Log.d("trien", address);
 
         }
     }
-
 
     @Override
     protected void onResumeFragments() {
@@ -733,7 +742,7 @@ Log.d("trien", address);
      */
     private void stopLocationUpdates() {
         if (!mRequestingLocationUpdates) {
-            Log.d(LOG_TAG, "stopLocationUpdates: updates never requested, no-op.");
+            LogUtils.debug(LOG_TAG, "stopLocationUpdates: updates never requested, no-op.");
             return;
         }
 
@@ -760,7 +769,8 @@ Log.d("trien", address);
             // move camera to current location
             LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 12);
-            mMap.animateCamera(cameraUpdate);
+            // mMap.animateCamera(cameraUpdate);
+            mMap.moveCamera(cameraUpdate);
 
         }
         // Return false so that we don't consume the event and the default behavior still occurs

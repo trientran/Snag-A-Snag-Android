@@ -8,7 +8,7 @@
     tools:context="com.digitalnoir.snagasnag.LetsSnagActivity">
 
     <Button
-        android:id="@+id/btnMap"
+        android:id="@+id/letsSnagBtn"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:background="@drawable/popup_bottom_grey"
@@ -22,14 +22,14 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/snagTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/snag_a_snag"
-        android:textStyle="bold"
         android:textColor="@color/black"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnMap"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/letsSnagBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

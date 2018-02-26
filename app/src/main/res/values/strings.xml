@@ -23,6 +23,34 @@
     <string name="add_a_snag_cover_photo">Add a Snag cover photo</string>
     <string name="snag_it">Snag It</string>
     <string name="add_sizzle_alert">Select and hold the sizzle location</string>
+
+    <!--    Let's nag   -->
     <string name="lets_snag">Let\'s snag</string>
     <string name="snag_a_snag">Snag-A-Snag</string>
+
+    <!--    Take the oath   -->
+    <string name="take_the_oath">Take the oath</string>
+    <string name="oath_title">
+      <![CDATA[ <center> <font size="18">
+        We need to make sure
+        <br/>
+        you\'re worthy of
+        <br/>
+        repping the <b>Snag Army/b> </font> </center>
+    ]]>
+    </string>
+    <string name="hint_type_here">type here..</string>
+    <string name="create_username_hint">
+    <![CDATA[ <center>
+
+    <b>Create your Snag Username (it must contain the word &quot;snag&quot;)      </ center>
+
+    ]]>
+    </string>
+    <!--    Swear   -->
+
+    <!--    Sizzle details   -->
+
+    <!--    Rate   -->
+
 </resources>

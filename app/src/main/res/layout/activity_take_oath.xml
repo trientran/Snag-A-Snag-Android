@@ -8,13 +8,13 @@
     tools:context="com.digitalnoir.snagasnag.LetsSnagActivity">
 
     <Button
-        android:id="@+id/btnMap"
+        android:id="@+id/letsSnagBtn"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:background="@drawable/popup_bottom_grey"
-        android:text="@string/lets_snag"
-        android:textColor="@color/White"
+        android:text="@string/take_the_oath"
         android:textAppearance="@style/TitleTextStyle"
+        android:textColor="@color/White"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,17 +22,65 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+        android:id="@+id/oathTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/snag_a_snag"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnMap"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/oath_title"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/createUserTV"
+        app:layout_constraintDimensionRatio="w,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/oathTitle"
+        app:layout_constraintVertical_bias="0.497"
+        app:srcCompat="@drawable/ic_oath1" />
+
+    <EditText
+        android:id="@+id/usernameInput"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
+        android:layout_marginBottom="40dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        android:background="@drawable/add_sizzle_edit_text"
+        android:ems="10"
+        android:hint="@string/hint_type_here"
+        android:inputType=""
+        android:paddingLeft="15dp"
+        android:paddingStart="15dp"
+        android:textColor="@color/bottomGrey"
+        android:textSize="14sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintBottom_toTopOf="@+id/letsSnagBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/createUserTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:text="@string/create_username_hint"
+        app:layout_constraintBottom_toTopOf="@+id/usernameInput"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
