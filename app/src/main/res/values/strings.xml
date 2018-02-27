@@ -31,24 +31,49 @@
     <!--    Take the oath   -->
     <string name="take_the_oath">Take the oath</string>
     <string name="oath_title">
-      <![CDATA[ <center> <font size="18">
+        <![CDATA[
+
         We need to make sure
         <br/>
         you\'re worthy of
         <br/>
-        repping the <b>Snag Army/b> </font> </center>
-    ]]>
+        repping the <b>Snag Army</b>
+
+        ]]>
     </string>
     <string name="hint_type_here">type here..</string>
     <string name="create_username_hint">
-    <![CDATA[ <center>
+        <![CDATA[
 
-    <b>Create your Snag Username (it must contain the word &quot;snag&quot;)      </ center>
+    <b>Create your Snag Username</b>
+    <br/>
+    (it must contain the word <b>&quot;snag&quot;</b>)
 
+        ]]>
+    </string>
+
+    <!--    Swear   -->
+    <string name="i_do">I Do</string>
+    <string name="swear_title">
+        <![CDATA[
+
+        Do you swear to the
+        <br/>
+        Snag Oath?
+        ]]>
+   </string>
+
+    <string name="swear_body">
+      <![CDATA[
+        <i>Do you,</i> <b>%1$s,</b> <i>solemnly
+
+         swear by the holy snag to discover
+
+         and review honestly and to benefit all
+
+         of snag-kind?</i>
     ]]>
     </string>
-    <!--    Swear   -->
-
     <!--    Sizzle details   -->
 
     <!--    Rate   -->

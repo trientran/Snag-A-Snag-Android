@@ -1,30 +1,25 @@
 package com.digitalnoir.snagasnag;
 
-import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.digitalnoir.snagasnag.utility.LogUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import static com.digitalnoir.snagasnag.utility.DataUtil.createNewUser;
 
 public class TakeOathActivity extends AppCompatActivity {
+
+    /** Tag for the log messages */
+    private static final String LOG_TAG = TakeOathActivity.class.getSimpleName();
 
     private TextView oathTitleTextView;
     private TextView createUserTextView;
@@ -36,13 +31,13 @@ public class TakeOathActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_take_oath);
 
-        oathTitleTextView = (TextView) findViewById(R.id.oathTitle);
-        createUserTextView = (TextView) findViewById(R.id.createUserTV);
-        oathTitleTextView.setText(formatText(getString(R.string.oath_title)));
-        createUserTextView.setText(formatText(getString(R.string.create_username_hint)));
+        oathTitleTextView = (TextView) findViewById(R.id.oathTitleTv);
+        createUserTextView = (TextView) findViewById(R.id.createUserTv);
+        oathTitleTextView.setText(formatTextNoParam(getString(R.string.oath_title)));
+        createUserTextView.setText(formatTextNoParam(getString(R.string.create_username_hint)));
 
         usernameInput = (EditText) findViewById(R.id.usernameInput);
-        takeOathBtn = (Button) findViewById(R.id.letsSnagBtn);
+        takeOathBtn = (Button) findViewById(R.id.takeOathBtn);
 
         takeOathBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,57 +46,37 @@ public class TakeOathActivity extends AppCompatActivity {
             }
         });
 
-        createNewUser(this);
     }
+
 
     /**
      * Handle Take the Oath button click.
      */
     private void onTakeOathBtnClick() {
 
+        String username = String.valueOf(usernameInput.getText());
+
+        if (username.toLowerCase().contains("snag")) {
+
+            createNewUser(this, username);
+
+            Intent intent = new Intent(this, SwearActivity.class);
+            startActivity(intent);
+        }
+
+        else {
+
+            Toast.makeText(this, "Username must contain the word snag", Toast.LENGTH_SHORT).show();
+        }
 
     }
+
 
     /**
      * Helper method to format text nicely.
      */
-    private static Spanned formatText(String styledText) {
+    public static Spanned formatTextNoParam(String styledText) {
         return Html.fromHtml(styledText);
-    }
-
-    public void createNewUser(Context context) {
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-        StringRequest jsonObjRequest = new StringRequest(Request.Method.POST, "http://snag.digitalnoirtest.net.au/snag-create-user/",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        LogUtils.debug("trien", response);
-                    }
-                }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                LogUtils.debug("volley", "Error: " + error.getMessage());
-                error.printStackTrace();
-            }
-        }) {
-
-            @Override
-            public String getBodyContentType() {
-                return "application/x-www-form-urlencoded; charset=UTF-8";
-            }
-
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("username", "TroySnag1");
-                params.put("unique_key", "qfP2ixc0fBIxoxiDfx3jbgaq");
-                return params;
-            }
-        };
-        queue.add(jsonObjRequest);
     }
 
 }

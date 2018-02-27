@@ -1,8 +1,19 @@
 package com.digitalnoir.snagasnag.utility;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.digitalnoir.snagasnag.model.Sizzle;
 
 import org.json.JSONArray;
@@ -18,24 +29,59 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Database utilities to CRUD JSON data
  */
 
 public class DataUtil {
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     private static final String LOG_TAG = DataUtil.class.getSimpleName();
 
     /**
      * Base URL for sizzle data from the web service
      */
-    public static final String SIZZLE_BASE_URL =
-            "http://snag.digitalnoirtest.net.au/";
+    public static final String SIZZLE_BASE_URL = "http://snag.digitalnoirtest.net.au/";
+
+    /**
+     * Appended URL tag for creating user
+     */
+    public static final String CREATE_USER_URL_TAG = "snag-create-user/";
+
+    /**
+     * Appended URL tag for creating sizzle
+     */
+    public static final String CREATE_SIZZLE_URL_TAG = "snag-create-post/";
+
+    /**
+     * Appended URL tag for creating comment
+     */
+    public static final String CREATE_COMMENT_URL_TAG = "snag-create-comment/";
+
+    /**
+     * Appended URL tag for creating rating
+     */
+    public static final String CREATE_RATING_URL_TAG = "snag-create-rating/";
+
+    /**
+     * Appended URL tag for displaying all sizzle
+     */
+    public static final String DISPLAY_SIZZLE_URL_TAG = "snag-display-sizzle/";
+
+    /**
+     * UNIQUE_KEY for accessing the web service
+     */
+    private static final String UNIQUE_KEY = "qfP2ixc0fBIxoxiDfx3jbgaq";
 
 
-    /** Default constructor */
+    /**
+     * Default constructor
+     */
     private DataUtil() {
     }
 
@@ -58,6 +104,159 @@ public class DataUtil {
         List<Sizzle> sizzles = extractFeatureFromJson(jsonResponse);
         // Return the list of {@link Sizzle}s
         return sizzles;
+    }
+
+    /**
+     * Create username
+     */
+    public static void createNewUser(final Context context, final String username) {
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        StringRequest jsonObjRequest = new StringRequest(Request.Method.POST, SIZZLE_BASE_URL +
+                "snag-create-user/"
+
+                , new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                LogUtils.debug("trien", response);
+
+                int userId = parseUserCreationResponse(context, response);
+
+                saveUserAsPreference(context, username, userId);
+
+                LogUtils.debug("trien2", String.valueOf(userId));
+
+
+            }
+        }
+
+                , new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                LogUtils.debug("volley", "Error: " + error.getMessage());
+                error.printStackTrace();
+
+            }
+        })
+
+        {
+
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("username", username);
+                params.put("unique_key", UNIQUE_KEY);
+                return params;
+            }
+        };
+
+        queue.add(jsonObjRequest);
+    }
+
+
+
+    public static void saveUserAsPreference(Context context, String username, int userId) {
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = mSettings.edit();
+
+        editor.putString("username", username);
+        editor.putInt("userId", userId);
+        editor.apply(); // apply is async
+        // editor.commit(); // commit is synchronous
+
+
+    }
+
+
+    /**
+     * Universal method to send a post request to web server
+     */
+    public static int sendPostRequest(final Context context, final String username, final String appendedURL) {
+
+        final int[] userId = new int[1];
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        StringRequest jsonObjRequest = new StringRequest(Request.Method.POST, SIZZLE_BASE_URL +
+                appendedURL
+
+                , new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                userId[0] = parseUserCreationResponse(context, response);
+                LogUtils.debug("trien", response);
+
+            }
+        }
+
+                , new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                LogUtils.debug("volley", "Error: " + error.getMessage());
+                error.printStackTrace();
+
+            }
+        })
+
+        {
+
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+
+                if (appendedURL.equals(CREATE_USER_URL_TAG) ) {
+
+                    params.put("username", username);
+                    params.put("UNIQUE_KEY", UNIQUE_KEY);
+                }
+
+                //else if (appendedURL.equals(CREATE_USER_URL_TAG))
+
+                return params;
+            }
+
+        };
+
+        queue.add(jsonObjRequest);
+        LogUtils.debug("trien", String.valueOf(userId[0]));
+        return userId[0];
+    }
+
+    /**
+     * handle User Creation Response
+     */
+    private static int parseUserCreationResponse(Context context, String response) {
+
+       if (response.contains("user_id")){
+            // After sending post method to create new user, the http response format will be: {"user_id":1076}
+            // We extract userId here
+            String userId = response.split(":")[1];
+            return Integer.parseInt(userId.substring(0, userId.length()-1));
+        }
+
+       else {
+           Toast.makeText(context, "Error creating username", Toast.LENGTH_SHORT).show();
+           return 0;
+        }
+
     }
 
     /**
@@ -206,6 +405,5 @@ public class DataUtil {
         // Return the list of sizzles
         return sizzles;
     }
-
 
 }

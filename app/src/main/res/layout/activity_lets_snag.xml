@@ -10,7 +10,7 @@
     <Button
         android:id="@+id/letsSnagBtn"
         android:layout_width="0dp"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:background="@drawable/popup_bottom_grey"
         android:text="@string/lets_snag"
         android:textColor="@color/White"
@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:text="@string/snag_a_snag"
         android:textColor="@color/black"
+        android:fontFamily=""
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/letsSnagBtn"

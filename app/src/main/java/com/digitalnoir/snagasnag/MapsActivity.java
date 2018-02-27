@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -19,6 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -72,10 +74,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.digitalnoir.snagasnag.utility.DataUtil.DISPLAY_SIZZLE_URL_TAG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.SIZZLE_BASE_URL;
 
 public class MapsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<List<Sizzle>>,
+        SharedPreferences.OnSharedPreferenceChangeListener,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnMapLongClickListener,
         OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener,
@@ -244,7 +248,17 @@ public class MapsActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        // set up my location button
+        // Obtain a reference to the SharedPreferences file for this app
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        // And register to be notified of preference changes
+        // So we know when the user has adjusted the query settings
+        prefs.registerOnSharedPreferenceChangeListener(this);
+        String username = prefs.getString("username", "missing");
+        int userId = prefs.getInt("userId", 0);
+
+        LogUtils.debug("TrienGetPref", username + " " + prefs.getInt("userId", 0));
+
+                // set up my location button
         mMyLocationBtn = (ImageButton) findViewById(R.id.myLocBtn);
         mMyLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,8 +278,14 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
 
-                mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
-                addSizzleAlertBtn.setVisibility(View.VISIBLE);
+                if (addSizzleAlertBtn.getVisibility() == View.GONE) {
+                    mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
+                    addSizzleAlertBtn.setVisibility(View.VISIBLE);
+                }
+                else {
+                    mAddBtn.setImageResource(R.drawable.ic_add_snag);
+                    addSizzleAlertBtn.setVisibility(View.GONE);
+                }
 
             }
         });
@@ -340,7 +360,7 @@ public class MapsActivity extends AppCompatActivity implements
     public Loader<List<Sizzle>> onCreateLoader(int i, Bundle bundle) {
 
         // create new SizzleLoader instance to kick off loading data on background thread
-        String allSizzleURL = (new StringBuilder()).append(SIZZLE_BASE_URL).append("snag-display-sizzle/").toString();
+        String allSizzleURL = (new StringBuilder()).append(SIZZLE_BASE_URL).append(DISPLAY_SIZZLE_URL_TAG).toString();
 
         return new SizzleLoader(this, allSizzleURL);
     }
@@ -391,7 +411,10 @@ public class MapsActivity extends AppCompatActivity implements
         super.onStart();
 
         startLocationUpdates();
+
+
     }
+
 
     // helper method to add all markers on map
     private void addAllMarkersOnMap(List<Sizzle> sizzles) {
@@ -913,6 +936,23 @@ public class MapsActivity extends AppCompatActivity implements
                 Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(actionStringId), listener).show();
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+
+        // return the current userID and username
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
+        String username = mSettings.getString("username", "missing");
+        int userId = mSettings.getInt("userId", 0);
+
+        LogUtils.debug("TrienGetPref2", username + " " + userId);
+    }
+
+    /*
+Instantiate and pass a callback
+*/
+
 
 
 }
