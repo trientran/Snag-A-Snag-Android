@@ -28,20 +28,22 @@ public class SwearActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_swear);
 
+        // todo better if get username from intent extra instead of getting pref
+        // get username from SharedPreferences
         SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         String username = mSettings.getString("username", "missing");
         //int userId = mSettings.getInt("userId", 0);
 
         swearTitleTextView = (TextView) findViewById(R.id.swearTitle);
         swearBodyTextView = (TextView) findViewById(R.id.swearBodyTV);
+
+        // set text to appropriate views
         swearTitleTextView.setText(formatTextNoParam(getString(R.string.swear_title)));
-
-        // todo get intent extra instead of getting pref
         swearBodyTextView.setText(formatText(getResources(), username));
-
 
         iDoBtn = (Button) findViewById(R.id.iDoBtn);
 
+        // go to MapsActivity after swearing
         iDoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +53,6 @@ public class SwearActivity extends AppCompatActivity {
 
             }
         });
-
 
     }
 

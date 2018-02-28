@@ -59,13 +59,25 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <include
-        android:id="@+id/addSizzlePopup"
-        layout="@layout/add_sizzle_popup"
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="150dp"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/addSizzlePopup"
+        layout="@layout/fragment_add_sizzle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="150dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

@@ -3,6 +3,8 @@ package com.digitalnoir.snagasnag;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +17,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -31,9 +32,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.digitalnoir.snagasnag.fragment.AddSizzleFragment;
 import com.digitalnoir.snagasnag.utility.LogUtils;
 import com.digitalnoir.snagasnag.utility.PermissionUtils;
 import com.google.android.gms.common.api.ApiException;
@@ -85,7 +88,8 @@ public class MapsActivity extends AppCompatActivity implements
         OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        AddSizzleFragment.ActionInterface{
 
     /**
      * Tag for log messages
@@ -123,8 +127,8 @@ public class MapsActivity extends AppCompatActivity implements
      */
     private ImageButton mAddBtn;
 
+    private FrameLayout fragmentContainer;
     private View addSizzlePopup;
-
 
     private ImageButton cancelBtn;
 
@@ -234,6 +238,11 @@ public class MapsActivity extends AppCompatActivity implements
     private static final LatLng PERTH = new LatLng(-31.952854, 115.857342);
 
     /**
+     * current marker (on map long click)
+     */
+    private List<Marker> newMarkers = new ArrayList<>();
+
+    /**
      * GeoDataClient object
      */
     protected GeoDataClient mGeoDataClient;
@@ -268,9 +277,11 @@ public class MapsActivity extends AppCompatActivity implements
         });
 
         mAddBtn = (ImageButton) findViewById(R.id.addBtn);
-        addSizzlePopup = findViewById(R.id.addSizzlePopup);
+        fragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
         addSizzleAlertBtn = (Button) findViewById(R.id.addSizzleAlertBtn);
         cancelBtn = (ImageButton) findViewById(R.id.cancelBtn);
+
+        addSizzlePopup = findViewById(R.id.addSizzlePopup);
 
         refreshBtn = (ImageButton) findViewById(R.id.refreshBtn);
 
@@ -294,10 +305,15 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
 
+                //fragmentContainer.setVisibility(View.GONE);
                 addSizzlePopup.setVisibility(View.GONE);
                 refreshBtn.setVisibility(View.VISIBLE);
                 mMyLocationBtn.setVisibility(View.VISIBLE);
 
+                // remove all new temporary markers
+                for (Marker marker : newMarkers) {
+                    marker.remove();
+                }
 
             }
         });
@@ -456,62 +472,94 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public void onMapLongClick(LatLng latLng) {
 
+        if (addSizzleAlertBtn.getVisibility() == View.VISIBLE) {
+
+            // display views properly
+            setUpViewsOnMapLongClick();
+
+            // create a new marker on selected position, add it to newMarkers list
+            newMarkers.add(addMarker(latLng));
+
+            // move camera to the selected location. latitude * 1.000050932 is to move the camera and
+            // marker to the top of Creat Sizzle popup window
+            //double newLat = latLng.latitude -0.00178;
+            //LatLng newLatLng = new LatLng(newLat, latLng.longitude);
+            CameraUpdate cameraUpdate1 = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+            float screenHeight = 0;
+            CameraUpdate cameraUpdate2 = CameraUpdateFactory.scrollBy(0, (screenHeight/2)-75);
+            // mMap.animateCamera(cameraUpdate); // this can be used to animate the camera smoothly
+            mMap.moveCamera(cameraUpdate1);
+            mMap.moveCamera(cameraUpdate2);
+
+            // get fragment manager
+            FragmentManager fragmentManager = getFragmentManager();
+            // replace
+            AddSizzleFragment addSizzleFragment = new AddSizzleFragment();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentContainer, addSizzleFragment);
+            fragmentTransaction.commit();
+
+
+            Double lati = (latLng.latitude);
+            Double loni = (latLng.longitude);
+
+            Geocoder myGeo = new Geocoder(getApplicationContext(), Locale.getDefault());
+            String address = null;
+            String city;
+            String state;
+            String country;
+            String postalCode;
+            String knownName;
+
+            try {
+                List<Address> myAddresses = myGeo.getFromLocation(lati, loni, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+
+                if (myAddresses != null && myAddresses.size() > 0) {
+
+                    address = myAddresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                    city = myAddresses.get(0).getLocality();
+                    state = myAddresses.get(0).getAdminArea();
+                    country = myAddresses.get(0).getCountryName();
+                    postalCode = myAddresses.get(0).getPostalCode();
+                    knownName = myAddresses.get(0).getFeatureName(); // Only if available else return NULL
+
+                } else {
+
+                    address = "";
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            LogUtils.debug("addressSnag", address);
+            LogUtils.debug("latlongSnag", latLng.toString());
+
+        }
+
+
+    }
+
+    private void setUpViewsOnMapLongClick() {
+
+        //fragmentContainer.setVisibility(View.VISIBLE);
         addSizzlePopup.setVisibility(View.VISIBLE);
         mAddBtn.setImageResource(R.drawable.ic_add_snag);
         addSizzleAlertBtn.setVisibility(View.GONE);
         refreshBtn.setVisibility(View.GONE);
         mMyLocationBtn.setVisibility(View.GONE);
+    }
 
-        // Style the marker icon
-        Bitmap resizedBitmap = resizeBitmap(R.drawable.ic_snag_pin_yellow);
+    /**
+     * Add a marker method.
+     */
+    private Marker addMarker(LatLng latLng) {
 
-        mMap.addMarker(new MarkerOptions()
+        Marker newMarker =  mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title("selected location")
-                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap)));
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
 
-        // move camera to the selected location. latitude * 1.000050932 is to move the camera and
-        // marker to the top of Creat Sizzle popup window
-        double newLat = latLng.latitude * 1.000050932;
-        LatLng newLatLng = new LatLng(newLat, latLng.longitude);
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(newLatLng, 17);
-        // mMap.animateCamera(cameraUpdate); // this can be used to animate the camera smoothly
-        mMap.moveCamera(cameraUpdate);
-
-        Double lati = (latLng.latitude);
-        Double loni = (latLng.longitude);
-
-        Geocoder myGeo = new Geocoder(getApplicationContext(), Locale.getDefault());
-        String address = null;
-        String city;
-        String state;
-        String country;
-        String postalCode;
-        String knownName;
-
-        try {
-            List<Address> myAddresses = myGeo.getFromLocation(lati, loni, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-
-            if (myAddresses != null && myAddresses.size() > 0) {
-
-                address = myAddresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                city = myAddresses.get(0).getLocality();
-                state = myAddresses.get(0).getAdminArea();
-                country = myAddresses.get(0).getCountryName();
-                postalCode = myAddresses.get(0).getPostalCode();
-                knownName = myAddresses.get(0).getFeatureName(); // Only if available else return NULL
-
-            } else {
-
-                address = "";
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        LogUtils.debug("addressSnag", address);
-        LogUtils.debug("latlongSnag", latLng.toString());
-
+        return newMarker;
     }
 
     /**
@@ -925,8 +973,8 @@ public class MapsActivity extends AppCompatActivity implements
      * Shows a {@link Snackbar}.
      *
      * @param mainTextStringId The id for the string resource for the Snackbar text.
-     * @param actionStringId   The text of the action item.
-     * @param listener         The listener associated with the Snackbar action.
+     * @param actionStringId   The text of the ActionInterface item.
+     * @param listener         The listener associated with the Snackbar ActionInterface.
      */
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
@@ -949,10 +997,12 @@ public class MapsActivity extends AppCompatActivity implements
         LogUtils.debug("TrienGetPref2", username + " " + userId);
     }
 
-    /*
-Instantiate and pass a callback
-*/
+    @Override
+    public void onRssItemSelected(String link) {
 
-
+       /* AddSizzleFragment addSizzleFragment = (AddSizzleFragment) getFragmentManager()
+                .findFragmentById(R.id.addSizzleFragment);
+        addSizzleFragment.updateDetail();*/
+    }
 
 }

@@ -33,11 +33,12 @@ public class TakeOathActivity extends AppCompatActivity {
 
         oathTitleTextView = (TextView) findViewById(R.id.oathTitleTv);
         createUserTextView = (TextView) findViewById(R.id.createUserTv);
-        oathTitleTextView.setText(formatTextNoParam(getString(R.string.oath_title)));
-        createUserTextView.setText(formatTextNoParam(getString(R.string.create_username_hint)));
-
         usernameInput = (EditText) findViewById(R.id.usernameInput);
         takeOathBtn = (Button) findViewById(R.id.takeOathBtn);
+
+        // set text to appropriate views
+        oathTitleTextView.setText(formatTextNoParam(getString(R.string.oath_title)));
+        createUserTextView.setText(formatTextNoParam(getString(R.string.create_username_hint)));
 
         takeOathBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,7 +51,8 @@ public class TakeOathActivity extends AppCompatActivity {
 
 
     /**
-     * Handle Take the Oath button click.
+     * Handle Take the Oath button click. If the input username contain the word snag, then go to swear activity
+     * if not, display a toast message to warn user
      */
     private void onTakeOathBtnClick() {
 
