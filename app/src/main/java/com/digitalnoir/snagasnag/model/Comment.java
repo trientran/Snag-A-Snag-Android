@@ -6,29 +6,29 @@ package com.digitalnoir.snagasnag.model;
 
 public class Comment {
 
-    private String userId;
-    private String sizzleId;
+    private int userId;
+    private int sizzleId;
     private String comment;
 
-    public Comment(String userId, String sizzleId, String comment) {
+    public Comment(int userId, int sizzleId, String comment) {
         this.userId = userId;
         this.sizzleId = sizzleId;
         this.comment = comment;
     }
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public String getSizzleId() {
+    public int getSizzleId() {
         return sizzleId;
     }
 
-    public void setSizzleId(String sizzleId) {
+    public void setSizzleId(int sizzleId) {
         this.sizzleId = sizzleId;
     }
 

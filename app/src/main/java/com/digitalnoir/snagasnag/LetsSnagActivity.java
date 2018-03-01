@@ -10,36 +10,48 @@ import android.widget.Button;
 
 public class LetsSnagActivity extends AppCompatActivity {
 
+    private Button letsSnagBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lets_snag);
 
-        Button letsSnagBtn;
         letsSnagBtn = (Button) findViewById(R.id.letsSnagBtn);
+
+        // set On-Click Listener for letsSnagBtn button
+        letsSnagBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onLetsSnagBtnClick();
+            }
+        });
+
+    }
+
+    private void onLetsSnagBtnClick() {
 
         // retrieve username or userId from SharedPreferences
         SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         String username = mSettings.getString("username", "missing");
-        //int userId = mSettings.getInt("userId", 0);
 
         // if username exist, then go straight to map activity, otherwise create a username
-        if (!username.equals("missing")) {
+     /*   if (!username.equals("missing")) {
             letsSnagBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
                     startActivity(intent);
 
                 }
             });
 
-        }
+        }*/
 
-        else {
-            Intent intent = new Intent(getBaseContext(), TakeOathActivity.class);
+        //else {
+            Intent intent = new Intent(getApplicationContext(), TakeOathActivity.class);
             startActivity(intent);
-        }
+        //}
     }
 }

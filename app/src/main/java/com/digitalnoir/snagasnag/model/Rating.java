@@ -6,14 +6,14 @@ package com.digitalnoir.snagasnag.model;
 
 public class Rating {
 
-    private String userId;
-    private String sizzleId;
+    private int userId;
+    private int sizzleId;
     private String sausage;
     private String bread;
     private String onion;
     private String sauce;
 
-    public Rating(String userId, String sizzleId, String sausage, String bread, String onion, String sauce) {
+    public Rating(int userId, int sizzleId, String sausage, String bread, String onion, String sauce) {
         this.userId = userId;
         this.sizzleId = sizzleId;
         this.sausage = sausage;
@@ -22,19 +22,19 @@ public class Rating {
         this.sauce = sauce;
     }
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
-    public String getSizzleId() {
+    public int getSizzleId() {
         return sizzleId;
     }
 
-    public void setSizzleId(String sizzleId) {
+    public void setSizzleId(int sizzleId) {
         this.sizzleId = sizzleId;
     }
 

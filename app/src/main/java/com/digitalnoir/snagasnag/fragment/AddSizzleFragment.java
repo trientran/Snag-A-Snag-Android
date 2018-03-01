@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.digitalnoir.snagasnag.R;
 
@@ -34,7 +33,7 @@ public class AddSizzleFragment extends Fragment {
      * activity correctly implements this interface.
      */
     public interface ActionInterface {
-        void onRssItemSelected(String link);
+        void onActionClick(String link);
     }
 
     @Override
@@ -64,7 +63,7 @@ public class AddSizzleFragment extends Fragment {
         String newTime = String.valueOf(System.currentTimeMillis());
         // send data to activity
         // inform the Activity about the change based on interface definition
-        listener.onRssItemSelected(newTime);
+        listener.onActionClick(newTime);
     }
 
     public void setText(String text) {

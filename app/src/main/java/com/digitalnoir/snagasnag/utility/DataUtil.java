@@ -112,12 +112,11 @@ public class DataUtil {
     /**
      * Create user
      */
-    public static void createNewUser(final Context context, String username) {
+    public static void createNewUser(Context context, String username) {
 
         Map<String, String> params = new HashMap <String, String>();
         params.put("unique_key", UNIQUE_KEY);
         params.put("username", username);
-
 
         sendPostRequest(context, CREATE_USER_URL_TAG, username, params);
     }
@@ -125,7 +124,8 @@ public class DataUtil {
     /**
      * Create sizzle
      */
-    public static void createNewSizzle(final Context context, final String username) {
+    public static void createNewSizzle(Context context, int userId, String latitude, String longitude,
+                                       String name, String address, String details, String photoUrl) {
         Map<String, String> params = new HashMap <String, String>();
         params.put("unique_key", UNIQUE_KEY);
         params.put("user_id", String.valueOf(userId));
@@ -135,34 +135,38 @@ public class DataUtil {
         params.put("address", address);
         params.put("details", details);
         params.put("photo", photoUrl);
-        //sendPostRequest(context, null, CREATE_SIZZLE_URL_TAG);
+
+        sendPostRequest(context, CREATE_SIZZLE_URL_TAG, null, params);
     }
 
     /**
      * Create comment
      */
-    public static void createNewComment(final Context context, final String username) {
+    public static void createNewComment(Context context, int userId, int sizzleId, String comment) {
         Map<String, String> params = new HashMap <String, String>();
         params.put("unique_key", UNIQUE_KEY);
         params.put("user_id", String.valueOf(userId));
-        params.put("sizzle_id", latitude);
-        params.put("comment", longitude);
-        //sendPostRequest(context, username, CREATE_COMMENT_URL_TAG);
+        params.put("sizzle_id", String.valueOf(sizzleId));
+        params.put("comment", comment);
+
+        sendPostRequest(context, CREATE_COMMENT_URL_TAG, null, params);
     }
 
     /**
      * Create rating
      */
-    public static void createNewRating(final Context context, final String username) {
+    public static void createNewRating(Context context, int userId, int sizzleId, String sausage,
+                                       String bread, String onion, String sauce) {
         Map<String, String> params = new HashMap <String, String>();
         params.put("unique_key", UNIQUE_KEY);
-        params.put("latitude", latitude);
-        params.put("longitude", longitude);
-        params.put("name", name);
-        params.put("address", address);
-        params.put("details", details);
-        params.put("photo", photoUrl);
-        //sendPostRequest(context, username, CREATE_RATING_URL_TAG);
+        params.put("user_id", String.valueOf(userId));
+        params.put("sizzle_id", String.valueOf(sizzleId));
+        params.put("sausage", sausage);
+        params.put("bread", bread);
+        params.put("onion", onion);
+        params.put("sauce", sauce);
+
+        sendPostRequest(context, CREATE_RATING_URL_TAG, null, params);
     }
 
     /**
@@ -226,10 +230,6 @@ public class DataUtil {
 
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-
-
-                // input pair values properly to send to web server according to type of post request
-
 
                 return params;
             }
@@ -375,25 +375,25 @@ public class DataUtil {
                  * For a given sizzle, extract all needed values associated with each sizzle.
                  */
 
-                // Extract the value for the key called "place"
+                // Extract the value for the key called "id"
                 int sizzleId = currentSizzle.getInt("id");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "lat"
                 String latitude = currentSizzle.getString("lat");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "lng"
                 String longitude = currentSizzle.getString("lng");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "name"
                 String name = currentSizzle.getString("name");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "address"
                 String address = currentSizzle.getString("address");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "details"
                 String detail = currentSizzle.getString("details");
 
-                // Extract the value for the key called "url"
+                // Extract the value for the key called "img"
                 String photoUrl = currentSizzle.getString("img");
 
                 // Create a new {@link Sizzle} object with the magnitude, location, time,

@@ -34,6 +34,9 @@
 
     <!--    Take the oath   -->
     <string name="take_the_oath">Take the oath</string>
+    <string name="toast_username_empty">Username is empty</string>
+    <string name="toast_username_lacking_snag">Username must contain the word snag</string>
+
     <string name="oath_title">
         <![CDATA[
 
@@ -79,6 +82,8 @@
          of snag-kind?</i>
     ]]>
     </string>
+    <string name="toast_check_internet">No internet connection</string>
+    <string name="toast_invalid_character">Username should not contain special character</string>
 
 
     <!--    Sizzle details   -->

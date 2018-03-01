@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.digitalnoir.snagasnag.utility.LogUtils;
 
+import static com.digitalnoir.snagasnag.TakeOathActivity.EXTRA_USER_NAME;
 import static com.digitalnoir.snagasnag.TakeOathActivity.formatTextNoParam;
 
 public class SwearActivity extends AppCompatActivity {
@@ -28,11 +29,8 @@ public class SwearActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_swear);
 
-        // todo better if get username from intent extra instead of getting pref
-        // get username from SharedPreferences
-        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        String username = mSettings.getString("username", "missing");
-        //int userId = mSettings.getInt("userId", 0);
+        Intent intent = getIntent();
+        String username = intent.getStringExtra(EXTRA_USER_NAME);
 
         swearTitleTextView = (TextView) findViewById(R.id.swearTitle);
         swearBodyTextView = (TextView) findViewById(R.id.swearBodyTV);
