@@ -70,7 +70,7 @@ public class TakeOathActivity extends AppCompatActivity {
         username = username.trim().replace("  ", " ");
 
         // use this Regular Expression pattern to validate when required
-        Pattern pattern = Pattern.compile("[A-Za-z0-9_]+");
+        Pattern pattern = Pattern.compile("[A-Za-z0-9 _]+");
         boolean valid = (username != null) && pattern.matcher(username).matches();
 
         // Get a reference to the ConnectivityManager to check state of network connectivity
@@ -92,15 +92,17 @@ public class TakeOathActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.toast_username_lacking_snag), Toast.LENGTH_SHORT).show();
         }
 
-        /*else if (!valid) {
+        else if (!valid) {
+
             Toast.makeText(this, getString(R.string.toast_invalid_character), Toast.LENGTH_SHORT).show();
-        }*/
+        }
 
         else if (!(networkInfo != null && networkInfo.isConnected())) {
 
             Log.e(LOG_TAG, "Error loading, no internet connection");
             Toast.makeText(this, getString(R.string.toast_check_internet), Toast.LENGTH_SHORT).show();
         }
+
 
         // If there is a network connection and text validation is ok then send a request to create username
         else {

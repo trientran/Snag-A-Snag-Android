@@ -93,7 +93,7 @@ public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        AddSizzleFragment.ActionInterface{
+        AddSizzleFragment.ActionInterface {
 
     /**
      * Tag for log messages
@@ -117,13 +117,8 @@ public class MapsActivity extends AppCompatActivity implements
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
     private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int PICK_IMAGE_REQUEST= 99;
+    private static final int PICK_IMAGE_REQUEST = 99;
     Bitmap bitmap;
-    private EditText sizzleNameEditText;
-    private EditText addressEditText;
-    private EditText descEditText;
-    private Button addSizzleBtn;
-    private Button   snagItBottom;
 
 
     /**
@@ -142,9 +137,7 @@ public class MapsActivity extends AppCompatActivity implements
     private ImageButton mAddBtn;
 
     private FrameLayout fragmentContainer;
-    private View addSizzlePopup;
 
-    private ImageButton cancelBtn;
 
     private ImageButton refreshBtn;
     private Button addSizzleAlertBtn;
@@ -243,6 +236,11 @@ public class MapsActivity extends AppCompatActivity implements
     private GoogleMap mMap = null;
 
     /**
+     * List of markerOptions to be added to Google Map
+     */
+    List<MarkerOptions> markerOptions = new ArrayList<>();
+
+    /**
      * default location (Australia)
      */
     private static final LatLng BRISBANE = new LatLng(-27.47093, 153.0235);
@@ -286,7 +284,7 @@ public class MapsActivity extends AppCompatActivity implements
 
         LogUtils.debug("TrienGetPref", username + " " + prefs.getInt("userId", 0));
 
-                // set up my location button
+        // set up my location button
         mMyLocationBtn = (ImageButton) findViewById(R.id.myLocBtn);
         mMyLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -306,11 +304,10 @@ public class MapsActivity extends AppCompatActivity implements
         });
 
         mAddBtn = (ImageButton) findViewById(R.id.addBtn);
+
         fragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
         addSizzleAlertBtn = (Button) findViewById(R.id.addSizzleAlertBtn);
-        cancelBtn = (ImageButton) findViewById(R.id.cancelBtn);
 
-        addSizzlePopup = findViewById(R.id.addSizzlePopup);
 
         refreshBtn = (ImageButton) findViewById(R.id.refreshBtn);
 
@@ -318,11 +315,12 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
 
+                LogUtils.debug("triensiz", String.valueOf(mSizzles));
+
                 if (addSizzleAlertBtn.getVisibility() == View.GONE) {
                     mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
                     addSizzleAlertBtn.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     mAddBtn.setImageResource(R.drawable.ic_add_snag);
                     addSizzleAlertBtn.setVisibility(View.GONE);
                 }
@@ -330,22 +328,7 @@ public class MapsActivity extends AppCompatActivity implements
             }
         });
 
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                //fragmentContainer.setVisibility(View.GONE);
-                addSizzlePopup.setVisibility(View.GONE);
-                refreshBtn.setVisibility(View.VISIBLE);
-                mMyLocationBtn.setVisibility(View.VISIBLE);
-
-                // remove all new temporary markers
-                for (Marker marker : newMarkers) {
-                    marker.remove();
-                }
-
-            }
-        });
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -371,32 +354,10 @@ public class MapsActivity extends AppCompatActivity implements
         createLocationRequest();
         buildLocationSettingsRequest();
 
-          sizzleNameEditText  = (EditText) findViewById(R.id.nameEditText);
-          addressEditText = (EditText) findViewById(R.id.addressEditText);
-          descEditText = (EditText) findViewById(R.id.descEditText);
-          addSizzleBtn = (Button) findViewById(R.id.addSizzleBtn);
-        snagItBottom  = (Button) findViewById(R.id.snagItBottom);
+        // set up views if there is no fragments
+        setUpViewsIfNoFragment();
 
-        addSizzleBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                showFileChooser();
-
-            }
-        });
-
-        snagItBottom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-
-            }
-        });
     }
-
-
 
     /**
      * Initialize Loader to begin loading data on background thread
@@ -434,25 +395,23 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     /**
-     * As loader always load data on background thread. We gotta check if any other object used inside onLoadFinished
+     * As loader always load data on background thread. We gotta check if an object used inside onLoadFinished
      * is not null
      */
     @Override
     public void onLoadFinished(Loader<List<Sizzle>> loader, List<Sizzle> sizzles) {
 
+        LogUtils.debug("triensizzle", String.valueOf(sizzles));
+
         // If there is a valid list of {@link Sizzle}, then extract Lat Long values from all sizzles
         // and add them all as markers on map.
         if (sizzles != null && !sizzles.isEmpty()) {
 
-            if (mMap == null) {
+            // Add all markers on map
+            addAllMarkersOnMap(sizzles);
 
-                mMap
-            }
-            if (mMap != null) {
-                // Add all markers on map
-                addAllMarkersOnMap(sizzles);
-            }
         }
+
     }
 
     private void moveCameraToAustralia() {
@@ -492,14 +451,17 @@ public class MapsActivity extends AppCompatActivity implements
         enableMyLocation();
 
 
-        LogUtils.debug("triensiz", String.valueOf(mSizzles));
-
-//if (map doesm't have markers) {
-        addAllMarkersOnMap(mSizzles);
-
+        LogUtils.debug("trienoption", markerOptions.toString());
 
         // startLocationUpdates();
         moveCameraToAustralia();
+
+        //if map doesn't have markers, add markers to map
+        if (this.markerOptions != null && !this.markerOptions.isEmpty()) {
+            for (MarkerOptions markerOption : this.markerOptions) {
+                this.mMap.addMarker(markerOption);
+            }
+        }
     }
 
     @Override
@@ -519,11 +481,14 @@ public class MapsActivity extends AppCompatActivity implements
     // helper method to add all markers on map
     private void addAllMarkersOnMap(List<Sizzle> sizzles) {
 
-        // check if mMap is not null before invoking addMarker method to avoid "null object reference" error
-//        if (mMap != null) {
+        // make the marker icons bigger
+        Bitmap resizedBitmap = resizeBitmap(R.drawable.ic_snag_pin);
 
-            // make the marker icons bigger
-            Bitmap resizedBitmap = resizeBitmap(R.drawable.ic_snag_pin);
+        // store MarkerOptions to markerOptions array
+
+
+        // check if mMap is not null before invoking addMarker method to avoid "null object reference" error
+        if (mMap != null) {
 
             for (Sizzle sizzle : sizzles) {
                 // build markers with sizzleIds tagged
@@ -533,7 +498,24 @@ public class MapsActivity extends AppCompatActivity implements
                         .snippet(sizzle.getAddress())
                         .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))).setTag(sizzle.getSizzleId());
             }
-       // }
+
+        } else {
+
+            for (Sizzle sizzle : sizzles) {
+                // build markers with sizzleIds tagged
+                markerOptions.add(new MarkerOptions()
+                        .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
+                        .title(sizzle.getName())
+                        .snippet(sizzle.getAddress())
+                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap)));
+
+                // build markers with sizzleIds tagged
+                mSizzles.add(sizzle);
+
+            }
+
+        }
+
     }
 
     // bitmap resize tool
@@ -578,7 +560,7 @@ public class MapsActivity extends AppCompatActivity implements
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
             int screenHeight = metrics.heightPixels;
             LogUtils.debug("trienHeight", String.valueOf(screenHeight));
-            CameraUpdate cameraUpdate2 = CameraUpdateFactory.scrollBy(0, (screenHeight/2)-350);
+            CameraUpdate cameraUpdate2 = CameraUpdateFactory.scrollBy(0, (screenHeight / 2) - 350);
             // mMap.animateCamera(cameraUpdate); // this can be used to animate the camera smoothly
             mMap.moveCamera(cameraUpdate2);
 
@@ -587,7 +569,7 @@ public class MapsActivity extends AppCompatActivity implements
             // replace
             AddSizzleFragment addSizzleFragment = new AddSizzleFragment();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentContainer, addSizzleFragment);
+            fragmentTransaction.add(R.id.fragmentContainer, addSizzleFragment);
             fragmentTransaction.commit();
 
             Double lati = (latLng.latitude);
@@ -631,8 +613,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     private void setUpViewsOnMapLongClick() {
 
-        //fragmentContainer.setVisibility(View.VISIBLE);
-        addSizzlePopup.setVisibility(View.VISIBLE);
+        fragmentContainer.setVisibility(View.VISIBLE);
         mAddBtn.setImageResource(R.drawable.ic_add_snag);
         addSizzleAlertBtn.setVisibility(View.GONE);
         refreshBtn.setVisibility(View.GONE);
@@ -644,7 +625,7 @@ public class MapsActivity extends AppCompatActivity implements
      */
     private Marker addMarker(LatLng latLng) {
 
-        Marker newMarker =  mMap.addMarker(new MarkerOptions()
+        Marker newMarker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title("selected location")
                 .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
@@ -809,17 +790,6 @@ public class MapsActivity extends AppCompatActivity implements
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri filePath = data.getData();
-            try {
-                //Getting the Bitmap from Gallery
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                Toast.makeText(this, ""+bitmap, Toast.LENGTH_SHORT).show();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
         switch (requestCode) {
             // Check for the integer request code originally supplied to startResolutionForResult().
@@ -1094,45 +1064,28 @@ public class MapsActivity extends AppCompatActivity implements
         LogUtils.debug("TrienGetPref2", username + " " + userId);
     }
 
+    // todo
     @Override
     public void onActionClick(String link) {
 
-       /* AddSizzleFragment addSizzleFragment = (AddSizzleFragment) getFragmentManager()
-                .findFragmentById(R.id.addSizzleFragment);
-        addSizzleFragment.updateDetail();*/
+
     }
 
+    private void setUpViewsIfNoFragment() {
+        AddSizzleFragment addSizzleFragment = (AddSizzleFragment) getFragmentManager()
+                .findFragmentById(R.id.fragmentContainer);
 
-    /**
-     * Storage permission.
-     *
-     */
-    private void requestPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(MapsActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            Toast.makeText(MapsActivity.this, " Please allow this permission in App Settings.", Toast.LENGTH_LONG).show();
-        } else {
-            ActivityCompat.requestPermissions(MapsActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        if (addSizzleFragment==null || !addSizzleFragment.isInLayout()) {
+
+            fragmentContainer.setVisibility(View.GONE);
+            refreshBtn.setVisibility(View.VISIBLE);
+            mMyLocationBtn.setVisibility(View.VISIBLE);
+
+            // remove all new temporary markers
+            for (Marker marker : newMarkers) {
+                marker.remove();
+            }
         }
     }
-
-    private boolean checkPermission() {
-        int result = ContextCompat.checkSelfPermission(MapsActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void showFileChooser() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-    }
-
-
-
-
 
 }
