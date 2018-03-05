@@ -84,6 +84,7 @@
     </string>
     <string name="toast_check_internet">No internet connection</string>
     <string name="toast_invalid_character">Username should not contain special character</string>
+    <string name="pick_image_intent_text">Pick an image</string>
 
 
     <!--    Sizzle details   -->

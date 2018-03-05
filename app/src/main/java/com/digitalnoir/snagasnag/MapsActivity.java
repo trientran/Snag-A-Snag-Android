@@ -3,8 +3,6 @@ package com.digitalnoir.snagasnag;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -20,35 +18,31 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.design.widget.Snackbar;
-import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.fragment.AddSizzleFragment;
-import com.digitalnoir.snagasnag.utility.LogUtils;
+import com.digitalnoir.snagasnag.model.Sizzle;
+import com.digitalnoir.snagasnag.utility.LogUtil;
 import com.digitalnoir.snagasnag.utility.PermissionUtils;
+import com.digitalnoir.snagasnag.utility.SizzleLoader;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-
-
-import com.digitalnoir.snagasnag.model.Sizzle;
-import com.digitalnoir.snagasnag.utility.SizzleLoader;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -62,7 +56,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -81,6 +74,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.digitalnoir.snagasnag.fragment.AddSizzleFragment.EXTRA_SELECTED_ADDRESS;
+import static com.digitalnoir.snagasnag.fragment.AddSizzleFragment.EXTRA_SELECTED_LAT_LNG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.DISPLAY_SIZZLE_URL_TAG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.SIZZLE_BASE_URL;
 
@@ -93,7 +88,7 @@ public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        AddSizzleFragment.ActionInterface {
+        AddSizzleFragment.OnCloseBtnClickListener {
 
     /**
      * Tag for log messages
@@ -264,6 +259,13 @@ public class MapsActivity extends AppCompatActivity implements
      */
     private Marker mSelectedMarker;
 
+    /**
+     * Keeps track of the selected address.
+     */
+    String mSelectedAddress = null;
+
+    private Bundle mSavedInstanceState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -282,7 +284,7 @@ public class MapsActivity extends AppCompatActivity implements
 
         mSizzles = new ArrayList<>();
 
-        LogUtils.debug("TrienGetPref", username + " " + prefs.getInt("userId", 0));
+        LogUtil.debug("TrienGetPref", username + " " + prefs.getInt("userId", 0));
 
         // set up my location button
         mMyLocationBtn = (ImageButton) findViewById(R.id.myLocBtn);
@@ -315,7 +317,7 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
 
-                LogUtils.debug("triensiz", String.valueOf(mSizzles));
+                LogUtil.debug("triensiz", String.valueOf(mSizzles));
 
                 if (addSizzleAlertBtn.getVisibility() == View.GONE) {
                     mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
@@ -354,8 +356,7 @@ public class MapsActivity extends AppCompatActivity implements
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        // set up views if there is no fragments
-        setUpViewsIfNoFragment();
+        mSavedInstanceState = savedInstanceState;
 
     }
 
@@ -389,7 +390,7 @@ public class MapsActivity extends AppCompatActivity implements
     public Loader<List<Sizzle>> onCreateLoader(int i, Bundle bundle) {
 
         // create new SizzleLoader instance to kick off loading data on background thread
-        String allSizzleURL = (new StringBuilder()).append(SIZZLE_BASE_URL).append(DISPLAY_SIZZLE_URL_TAG).toString();
+        String allSizzleURL = SIZZLE_BASE_URL + DISPLAY_SIZZLE_URL_TAG;
 
         return new SizzleLoader(this, allSizzleURL);
     }
@@ -401,7 +402,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public void onLoadFinished(Loader<List<Sizzle>> loader, List<Sizzle> sizzles) {
 
-        LogUtils.debug("triensizzle", String.valueOf(sizzles));
+        LogUtil.debug("triensizzle", String.valueOf(sizzles));
 
         // If there is a valid list of {@link Sizzle}, then extract Lat Long values from all sizzles
         // and add them all as markers on map.
@@ -451,7 +452,7 @@ public class MapsActivity extends AppCompatActivity implements
         enableMyLocation();
 
 
-        LogUtils.debug("trienoption", markerOptions.toString());
+        LogUtil.debug("trienoption", markerOptions.toString());
 
         // startLocationUpdates();
         moveCameraToAustralia();
@@ -559,52 +560,50 @@ public class MapsActivity extends AppCompatActivity implements
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
             int screenHeight = metrics.heightPixels;
-            LogUtils.debug("trienHeight", String.valueOf(screenHeight));
+            LogUtil.debug("trienHeight", String.valueOf(screenHeight));
             CameraUpdate cameraUpdate2 = CameraUpdateFactory.scrollBy(0, (screenHeight / 2) - 350);
             // mMap.animateCamera(cameraUpdate); // this can be used to animate the camera smoothly
             mMap.moveCamera(cameraUpdate2);
 
-            // get fragment manager
-            FragmentManager fragmentManager = getFragmentManager();
-            // replace
+            // Creating a new head fragment
             AddSizzleFragment addSizzleFragment = new AddSizzleFragment();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.fragmentContainer, addSizzleFragment);
-            fragmentTransaction.commit();
+            if(mSavedInstanceState == null) {
+
+                // Add the fragment to its container using a transaction
+                getFragmentManager().beginTransaction()
+                        .add(R.id.fragmentContainer, addSizzleFragment)
+                        .commit();
+            }
 
             Double lati = (latLng.latitude);
             Double loni = (latLng.longitude);
 
             Geocoder myGeo = new Geocoder(getApplicationContext(), Locale.getDefault());
-            String address = null;
-            String city;
-            String state;
-            String country;
-            String postalCode;
-            String knownName;
+
 
             try {
                 List<Address> myAddresses = myGeo.getFromLocation(lati, loni, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
 
                 if (myAddresses != null && myAddresses.size() > 0) {
 
-                    address = myAddresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                    city = myAddresses.get(0).getLocality();
-                    state = myAddresses.get(0).getAdminArea();
-                    country = myAddresses.get(0).getCountryName();
-                    postalCode = myAddresses.get(0).getPostalCode();
-                    knownName = myAddresses.get(0).getFeatureName(); // Only if available else return NULL
+                    mSelectedAddress = myAddresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
 
                 } else {
 
-                    address = "";
+                    mSelectedAddress = "";
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            LogUtils.debug("addressSnag", address);
-            LogUtils.debug("latlongSnag", latLng.toString());
+            LogUtil.debug("addressSnag", mSelectedAddress);
+            LogUtil.debug("latlongSnag", latLng.toString());
+
+            // send selected address to AddSizzleFragment
+            Bundle bundle = new Bundle();
+            bundle.putString(EXTRA_SELECTED_ADDRESS, mSelectedAddress);
+            bundle.putParcelable(EXTRA_SELECTED_LAT_LNG, latLng);
+            addSizzleFragment.setArguments(bundle);
 
         }
 
@@ -613,7 +612,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     private void setUpViewsOnMapLongClick() {
 
-        fragmentContainer.setVisibility(View.VISIBLE);
+        //fragmentContainer.setVisibility(View.VISIBLE);
         mAddBtn.setImageResource(R.drawable.ic_add_snag);
         addSizzleAlertBtn.setVisibility(View.GONE);
         refreshBtn.setVisibility(View.GONE);
@@ -665,16 +664,17 @@ public class MapsActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
+/*    @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
         if (mPermissionDenied) {
             // Permission was not granted, display error dialog.
             //showMissingPermissionError();
-            this.recreate();
+            //this.recreate();
             mPermissionDenied = false;
         }
-    }
+
+    }*/
 
     @Override
     public void onResume() {
@@ -885,7 +885,7 @@ public class MapsActivity extends AppCompatActivity implements
      */
     private void stopLocationUpdates() {
         if (!mRequestingLocationUpdates) {
-            LogUtils.debug(LOG_TAG, "stopLocationUpdates: updates never requested, no-op.");
+            LogUtil.debug(LOG_TAG, "stopLocationUpdates: updates never requested, no-op.");
             return;
         }
 
@@ -1040,8 +1040,8 @@ public class MapsActivity extends AppCompatActivity implements
      * Shows a {@link Snackbar}.
      *
      * @param mainTextStringId The id for the string resource for the Snackbar text.
-     * @param actionStringId   The text of the ActionInterface item.
-     * @param listener         The listener associated with the Snackbar ActionInterface.
+     * @param actionStringId   The text of the OnCloseBtnClickListener item.
+     * @param listener         The listener associated with the Snackbar OnCloseBtnClickListener.
      */
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
@@ -1061,30 +1061,25 @@ public class MapsActivity extends AppCompatActivity implements
         String username = mSettings.getString("username", "missing");
         int userId = mSettings.getInt("userId", 0);
 
-        LogUtils.debug("TrienGetPref2", username + " " + userId);
+        LogUtil.debug("TrienGetPref2", username + " " + userId);
     }
 
     // todo
     @Override
-    public void onActionClick(String link) {
+    public void onCloseBtnClick() {
 
-
-    }
-
-    private void setUpViewsIfNoFragment() {
+        // remove addSizzleFragment
         AddSizzleFragment addSizzleFragment = (AddSizzleFragment) getFragmentManager()
                 .findFragmentById(R.id.fragmentContainer);
+        getFragmentManager().beginTransaction()
+                .remove(addSizzleFragment).commit();
 
-        if (addSizzleFragment==null || !addSizzleFragment.isInLayout()) {
+        refreshBtn.setVisibility(View.VISIBLE);
+        mMyLocationBtn.setVisibility(View.VISIBLE);
 
-            fragmentContainer.setVisibility(View.GONE);
-            refreshBtn.setVisibility(View.VISIBLE);
-            mMyLocationBtn.setVisibility(View.VISIBLE);
-
-            // remove all new temporary markers
-            for (Marker marker : newMarkers) {
-                marker.remove();
-            }
+        // remove all new temporary markers
+        for (Marker marker : newMarkers) {
+            marker.remove();
         }
     }
 

@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.digitalnoir.snagasnag.utility.LogUtil;
+
 public class LetsSnagActivity extends AppCompatActivity {
 
     private Button letsSnagBtn;
@@ -34,9 +36,9 @@ public class LetsSnagActivity extends AppCompatActivity {
         // retrieve username or userId from SharedPreferences
         SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         String username = mSettings.getString("username", "missing");
-
+        LogUtil.debug("trienshare", username);
         // if username exist, then go straight to map activity, otherwise create a username
-     /*   if (!username.equals("missing")) {
+        if (!username.equals("missing")) {
             letsSnagBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -47,11 +49,11 @@ public class LetsSnagActivity extends AppCompatActivity {
                 }
             });
 
-        }*/
+        }
 
-        //else {
+        else {
             Intent intent = new Intent(getApplicationContext(), TakeOathActivity.class);
             startActivity(intent);
-        //}
+        }
     }
 }

@@ -1,19 +1,14 @@
 package com.digitalnoir.snagasnag;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.digitalnoir.snagasnag.utility.LogUtils;
 
 import static com.digitalnoir.snagasnag.TakeOathActivity.EXTRA_USER_NAME;
 import static com.digitalnoir.snagasnag.TakeOathActivity.formatTextNoParam;

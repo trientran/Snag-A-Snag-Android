@@ -2,8 +2,9 @@ package com.digitalnoir.snagasnag.utility;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.model.Sizzle;
 
 import org.json.JSONArray;
@@ -22,19 +24,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Database utilities to CRUD JSON data
@@ -79,7 +81,7 @@ public class DataUtil {
     /**
      * UNIQUE_KEY for accessing the web service
      */
-    private static final String UNIQUE_KEY = "qfP2ixc0fBIxoxiDfx3jbgaq";
+    public static final String UNIQUE_KEY = "qfP2ixc0fBIxoxiDfx3jbgaq";
 
 
     /**
@@ -124,19 +126,36 @@ public class DataUtil {
     /**
      * Create sizzle
      */
-    public static void createNewSizzle(Context context, int userId, String latitude, String longitude,
-                                       String name, String address, String details, String photoUrl) {
-        Map<String, String> params = new HashMap <String, String>();
-        params.put("unique_key", UNIQUE_KEY);
-        params.put("user_id", String.valueOf(userId));
-        params.put("latitude", latitude);
-        params.put("longitude", longitude);
-        params.put("name", name);
-        params.put("address", address);
-        params.put("details", details);
-        params.put("photo", photoUrl);
+    public static void createNewSizzle(WeakReference<Context> mWeakContext, int userId, Sizzle newSizzle, Bitmap bitmap) {
 
-        sendPostRequest(context, CREATE_SIZZLE_URL_TAG, null, params);
+        String url = SIZZLE_BASE_URL + CREATE_SIZZLE_URL_TAG;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeResource(mWeakContext.get().getResources(), R.drawable.ic_default_sizzle);
+        }
+        else {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, baos);
+        }
+
+        try {
+            HttpClient client = new HttpClient(url);
+            client.connectForMultipart();
+            client.addFormPart("unique_key", UNIQUE_KEY);
+            client.addFormPart("user_id", String.valueOf(userId));
+            client.addFormPart("latitude", newSizzle.getLatitude());
+            client.addFormPart("longitude", newSizzle.getLongitude());
+            client.addFormPart("name", newSizzle.getName());
+            client.addFormPart("address", newSizzle.getAddress());
+            client.addFormPart("details", newSizzle.getDetail());
+            client.addFilePart("photo", "unnamed-file.png", baos.toByteArray());
+            client.finishMultipart();
+            String data = client.getResponse();
+            Log.d("trien", data);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     /**
@@ -186,7 +205,7 @@ public class DataUtil {
             @Override
             public void onResponse(String response) {
 
-                LogUtils.debug(LOG_TAG, response);
+                LogUtil.debug(LOG_TAG, response);
 
                 // handle response properly according to type of post request
                 switch (appendedURL) {
@@ -194,7 +213,7 @@ public class DataUtil {
 
                         int userId = parseUserCreationResponse(context, response);
                         saveUserAsPreference(context, username, userId);
-                        LogUtils.debug(LOG_TAG, String.valueOf(userId));
+                        LogUtil.debug(LOG_TAG, String.valueOf(userId));
 
                         break;
                     case CREATE_SIZZLE_URL_TAG:
@@ -215,7 +234,7 @@ public class DataUtil {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                LogUtils.debug("volley", "Error: " + error.getMessage());
+                LogUtil.debug("volley", "Error: " + error.getMessage());
                 error.printStackTrace();
 
             }

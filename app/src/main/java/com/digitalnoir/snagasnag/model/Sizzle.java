@@ -15,6 +15,15 @@ public class Sizzle {
     private String detail;
     private String photoUrl;
 
+
+    public Sizzle(String latitude, String longitude, String name, String address, String detail) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.name = name;
+        this.address = address;
+        this.detail = detail;
+    }
+
     public Sizzle(int sizzleId, String latitude, String longitude, String name, String address, String detail, String photoUrl) {
         this.sizzleId = sizzleId;
         this.latitude = latitude;

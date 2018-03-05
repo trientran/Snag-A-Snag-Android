@@ -1,52 +1,41 @@
 package com.digitalnoir.snagasnag.utility;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
-
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import com.digitalnoir.snagasnag.model.Sizzle;
-
-import java.util.List;
+import java.lang.ref.WeakReference;
+import static com.digitalnoir.snagasnag.utility.DataUtil.createNewSizzle;
 
 /**
- * Loads a list of sizzles by using an AsyncTask to perform the
- * network request to the given URL.
+ * Created by Troy on 3/5/2018.
  */
 
-public class SizzleCreater extends AsyncTaskLoader<List<Sizzle>> {
+public class SizzleCreater extends AsyncTask<String, Void, String> {
 
-    /** Tag for log messages */
-    private static final String LOG_TAG = SizzleCreater.class.getName();
+    // use weak context to avoid leaking a context object
+    private WeakReference<Context> mWeakContext;
+    private int mUserId;
+    private Sizzle mNewSizzle;
+    private Bitmap mBitmap;
 
-    /** Query URL */
-    private String mUrl;
-
-    /**
-     * Constructs a new {@link SizzleCreater}.
-     *
-     * @param context of the activity
-     * @param url to load data from
-     */
-    public SizzleCreater(Context context, String url) {
-        super(context);
-        mUrl = url;
+    public SizzleCreater(Context context, int userId, Sizzle newSizzle, Bitmap bitmap) {
+        mWeakContext = new WeakReference<>(context);
+        this.mUserId = userId;
+        this.mNewSizzle = newSizzle;
+        this.mBitmap = bitmap;
     }
 
     @Override
-    protected void onStartLoading() {
-        forceLoad();
+    protected String doInBackground(String... params) {
+
+        createNewSizzle(mWeakContext, mUserId, mNewSizzle, mBitmap);
+
+        return null;
     }
 
-    /**
-     * This is on a background thread.
-     */
     @Override
-    public List<Sizzle> loadInBackground() {
-        if (mUrl == null) {
-            return null;
-        }
+    protected void onPostExecute(String data) {
 
-        // Perform the network request, parse the response, and extract a list of sizzles.
-        List<Sizzle> sizzles = DataUtil.fetchSizzleData(mUrl);
-        return sizzles;
     }
 }

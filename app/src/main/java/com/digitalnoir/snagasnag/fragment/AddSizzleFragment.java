@@ -3,37 +3,32 @@ package com.digitalnoir.snagasnag.fragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.model.Sizzle;
-import com.digitalnoir.snagasnag.utility.HttpClient;
-import com.google.android.gms.maps.model.Marker;
+import com.digitalnoir.snagasnag.utility.ImagePickerUtil;
+import com.digitalnoir.snagasnag.utility.LogUtil;
+import com.digitalnoir.snagasnag.utility.SizzleCreater;
+import com.google.android.gms.maps.model.LatLng;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-
-import static android.app.Activity.RESULT_OK;
+import static com.digitalnoir.snagasnag.utility.ImagePickerUtil.getPickImageIntent;
 
 /**
  * AddSizzleFragment controls Add sizzle popup window (fragment_add_sizzle)
@@ -41,23 +36,53 @@ import static android.app.Activity.RESULT_OK;
 
 public class AddSizzleFragment extends Fragment {
 
-    public static final String EXTRA_TEXT ="text";
-    private static final int PERMISSION_REQUEST_CODE = 1;
-    private static final int PICK_IMAGE_REQUEST= 99;
+    public static final String EXTRA_SELECTED_ADDRESS = "selected_address";
+    public static final String EXTRA_SELECTED_LAT_LNG = "selected_lat_lng";
+    public static final int PERMISSION_REQUEST_CODE = 1;
 
-    private String url = "http://snag.digitalnoirtest.net.au/snag-create-post/";
+    // PICK_IMAGE_ID for selecting image intent. The number doesn't matter
+    private static final int PICK_IMAGE_ID = 234;
 
-    private ActionInterface listener;
+    private OnCloseBtnClickListener mCallback;
+
 
     private EditText sizzleNameEditText;
     private EditText addressEditText;
-    private EditText descEditText;
-    private Button addSizzleBtn;
-    private Button  snagItBottom;
+    private EditText detailEditText;
+
+    private Button snagItBottom;
     private ImageButton closeBtn;
 
+    private Button addPhotoBigBtn;
+    private ImageButton addPhotoSmallBtn;
+    private TextView addPhotoTv;
 
+    LatLng latLng = null;
     Bitmap bitmap = null;
+
+    // default constructor
+    public AddSizzleFragment() {
+    }
+
+    /**
+     * The inner type interface {@link OnCloseBtnClickListener} let the activity, which must implement
+     * it, control the communication between fragments. In its onAttach() method it can check if the
+     * activity correctly implements this interface.
+     */
+    public interface OnCloseBtnClickListener {
+        void onCloseBtnClick();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnCloseBtnClickListener) {
+            mCallback = (OnCloseBtnClickListener) context;
+        } else {
+            throw new ClassCastException(context.toString()
+                    + " must implement AddSizzleFragment.OnCloseBtnClickListener");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -65,19 +90,43 @@ public class AddSizzleFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_add_sizzle,
                 container, false);
 
-        sizzleNameEditText  = (EditText) view.findViewById(R.id.nameEditText);
+        sizzleNameEditText = (EditText) view.findViewById(R.id.nameEditText);
         addressEditText = (EditText) view.findViewById(R.id.addressEditText);
-        descEditText = (EditText) view.findViewById(R.id.descEditText);
-        addSizzleBtn = (Button) view.findViewById(R.id.addSizzleBtn);
-        snagItBottom  = (Button) view.findViewById(R.id.snagItBottom);
+        detailEditText = (EditText) view.findViewById(R.id.descEditText);
+
+        snagItBottom = (Button) view.findViewById(R.id.snagItBottom);
         closeBtn = (ImageButton) view.findViewById(R.id.cancelBtn);
 
-        addSizzleBtn.setOnClickListener(new View.OnClickListener() {
+        addPhotoBigBtn = (Button) view.findViewById(R.id.addPicBigBtn);
+        addPhotoSmallBtn = (ImageButton) view.findViewById(R.id.addPicSmallBtn);
+        addPhotoTv = (TextView) view.findViewById(R.id.addPhotoTv);
+
+        addPhotoBigBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                showFileChooser();
+               // showFileChooser();
+                LogUtil.debug("addTrien", "aa");
+            }
+        });
 
+        addPhotoSmallBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent chooseImageIntent = getPickImageIntent(getActivity());
+                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+                LogUtil.debug("addTrien", "aa");
+            }
+        });
+
+        addPhotoTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent chooseImageIntent = getPickImageIntent(getActivity());
+                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+                LogUtil.debug("addTrien", "aa");
             }
         });
 
@@ -85,20 +134,29 @@ public class AddSizzleFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                String uniqueKey = "qfP2ixc0fBIxoxiDfx3jbgaq";
-                String userId = String.valueOf(132);
-                String lat = "-34.933121";
-                String lng =  "138.575439";
+                // retrieve userId from SharedPreferences
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                int userId = prefs.getInt("userId", 0);
+                LogUtil.debug("triensharedUId", String.valueOf(userId));
+
+                // create a new sizzle instance
+                Double lat = latLng.latitude;
+                Double lng = latLng.longitude;
                 String sizzleName = sizzleNameEditText.getText().toString();
-                String address = "108 Railway tce";
-                String desc = descEditText.getText().toString();
+                String address = addressEditText.getText().toString();
+                String desc = detailEditText.getText().toString();
+                Sizzle newSizzle = new Sizzle(String.valueOf(lat), String.valueOf(lng), sizzleName, address, desc);
 
-//                item.setActionView(R.layout.progress);
-                SendHttpRequestTask t = new SendHttpRequestTask();
+                // if userId exist, then go straight to creating a new sizzle
+                if (userId != 0) {
+                    // item.setActionView(R.layout.progress);
+                    SizzleCreater t = new SizzleCreater(getActivity(), userId, newSizzle, bitmap);
+                    t.execute();
+                }
+                LogUtil.debug("addTrien", "aa");
 
-                String[] params = new String[]{url, uniqueKey, userId, lat, lng, sizzleName, address, desc};
-                t.execute(params);
-
+                // close fragment
+                mCallback.onCloseBtnClick();
             }
         });
 
@@ -106,11 +164,9 @@ public class AddSizzleFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                getActivity().getFragmentManager().beginTransaction().remove(AddSizzleFragment.this).commit();
+                mCallback.onCloseBtnClick();
             }
         });
-
-
 
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkPermission()) {
@@ -124,34 +180,18 @@ public class AddSizzleFragment extends Fragment {
         return view;
     }
 
-
-    /**
-     * The inner type interface {@link ActionInterface} let the activity, which must implement
-     * it, control the communication between fragments. In its onAttach() method it can check if the
-     * activity correctly implements this interface.
-     */
-    public interface ActionInterface {
-        void onActionClick(String link);
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        /*Bundle bundle = getArguments();
+        Bundle bundle = getArguments();
         if (bundle != null) {
-            String text = bundle.getString(EXTRA_TEXT);
-            setText(text);
-        }*/
-    }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof ActionInterface) {
-            listener = (ActionInterface) context;
-        } else {
-            throw new ClassCastException(context.toString()
-                    + " must implement AddSizzleFragment.ActionInterface");
+            // get and set address for addressEditText
+            String address = bundle.getString(EXTRA_SELECTED_ADDRESS);
+            addressEditText.setText(address);
+
+            // get LatLng details
+            latLng = bundle.getParcelable(EXTRA_SELECTED_LAT_LNG);
         }
     }
 
@@ -161,17 +201,11 @@ public class AddSizzleFragment extends Fragment {
         String newTime = String.valueOf(System.currentTimeMillis());
         // send data to activity
         // inform the Activity about the change based on interface definition
-        listener.onActionClick(newTime);
-    }
-
-    public void setText(String text) {
-        //TextView view = (TextView) getView().findViewById(R.id.detailsText);
-       // view.setText(text);
+        mCallback.onCloseBtnClick();
     }
 
     /**
      * Storage permission.
-     *
      */
     private void requestPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -203,88 +237,26 @@ public class AddSizzleFragment extends Fragment {
         }
     }
 
-    private void showFileChooser() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // if we call super.onActivityResult here, this would trigger onActivityResult() from hosting activity
         //super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri filePath = data.getData();
-            try {
-                //Getting the Bitmap from Gallery
-                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), filePath);
-                Toast.makeText(getActivity(), ""+bitmap, Toast.LENGTH_SHORT).show();
-
-                //Setting the Bitmap to ImageView
-                BitmapDrawable bDrawable = new BitmapDrawable(getActivity().getResources(),bitmap);
-                addSizzleBtn.setBackground(bDrawable);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        switch(requestCode) {
+            case PICK_IMAGE_ID:
+                bitmap = ImagePickerUtil.getImageFromResult(getActivity(), resultCode, data);
+                setBitmapToImageBtn(addPhotoSmallBtn, bitmap);
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
         }
+
     }
 
-    private class SendHttpRequestTask extends AsyncTask<String, Void, String> {
-
-        Sizzle sizzle;
-/*
-        public SendHttpRequestTask(Sizzle sizzle) {
-            this.sizzle = sizzle;
-        }*/
-
-        @Override
-        protected String doInBackground(String... params) {
-            String url = params[0];
-            String param1 = params[1];
-            String param2 = params[2];
-            String param3 = params[3];
-            String param4 = params[4];
-            String param5 = params[5];
-            String param6 = params[6];
-            String param7 = params[7];
-
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            if (bitmap == null) {
-                bitmap = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.ic_default_sizzle);
-            }
-            bitmap.compress(Bitmap.CompressFormat.PNG, 0, baos);
-
-            try {
-                HttpClient client = new HttpClient(url);
-                client.connectForMultipart();
-                client.addFormPart("unique_key", param1);
-                client.addFormPart("user_id", param2);
-                client.addFormPart("latitude", param3);
-                client.addFormPart("longitude", param4);
-                client.addFormPart("name", param5);
-                client.addFormPart("address", param6);
-                client.addFormPart("details", param7);
-                client.addFilePart("photo", "unnamed-file.png", baos.toByteArray());
-                client.finishMultipart();
-                String data = client.getResponse();
-                Log.d("trien", data);
-            }
-            catch(Throwable t) {
-                t.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String data) {
-//            item.setActionView(null);
-
-        }
+    private void setBitmapToImageBtn(ImageButton imageBtn, Bitmap bitmap) {
+        //Setting the Bitmap to ImageView
+        BitmapDrawable bDrawable = new BitmapDrawable(getActivity().getResources(), bitmap);
+        imageBtn.setBackground(bDrawable);
     }
-
 }
