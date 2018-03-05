@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,13 +23,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.R;
+import com.digitalnoir.snagasnag.SwearActivity;
 import com.digitalnoir.snagasnag.model.Sizzle;
 import com.digitalnoir.snagasnag.utility.ImagePickerUtil;
 import com.digitalnoir.snagasnag.utility.LogUtil;
 import com.digitalnoir.snagasnag.utility.SizzleCreater;
 import com.google.android.gms.maps.model.LatLng;
 
+import static com.digitalnoir.snagasnag.utility.DataUtil.createNewUser;
+import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.ImagePickerUtil.getPickImageIntent;
+import static com.digitalnoir.snagasnag.utility.TextValidation.validateCommonInputText;
 
 /**
  * AddSizzleFragment controls Add sizzle popup window (fragment_add_sizzle)
@@ -71,6 +76,8 @@ public class AddSizzleFragment extends Fragment {
      */
     public interface OnCloseBtnClickListener {
         void onCloseBtnClick();
+
+        void onSnagItBtnClick();
     }
 
     @Override
@@ -105,7 +112,7 @@ public class AddSizzleFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-               // showFileChooser();
+                // showFileChooser();
                 LogUtil.debug("addTrien", "aa");
             }
         });
@@ -137,26 +144,39 @@ public class AddSizzleFragment extends Fragment {
                 // retrieve userId from SharedPreferences
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 int userId = prefs.getInt("userId", 0);
-                LogUtil.debug("triensharedUId", String.valueOf(userId));
+
 
                 // create a new sizzle instance
                 Double lat = latLng.latitude;
                 Double lng = latLng.longitude;
-                String sizzleName = sizzleNameEditText.getText().toString();
-                String address = addressEditText.getText().toString();
-                String desc = detailEditText.getText().toString();
-                Sizzle newSizzle = new Sizzle(String.valueOf(lat), String.valueOf(lng), sizzleName, address, desc);
 
-                // if userId exist, then go straight to creating a new sizzle
-                if (userId != 0) {
-                    // item.setActionView(R.layout.progress);
-                    SizzleCreater t = new SizzleCreater(getActivity(), userId, newSizzle, bitmap);
-                    t.execute();
+                // validate username with common pattern first
+                String sizzleName = validateCommonInputText(getActivity(), sizzleNameEditText, R.string.toast_sizzle_name_empty);
+
+                String address = validateCommonInputText(getActivity(), addressEditText, R.string.toast_sizzle_address_empty);
+
+                String desc = validateCommonInputText(getActivity(), detailEditText, R.string.toast_sizzle_detail_empty);
+
+                if (isInternetConnected(getActivity()) && sizzleName != null && address != null && desc != null) {
+
+                    // If there is a network connection and text validation is ok then send a request to create sizzle
+
+                    Sizzle newSizzle = new Sizzle(String.valueOf(lat), String.valueOf(lng), sizzleName, address, desc);
+
+                    // if userId exist, then go straight to creating a new sizzle
+                    if (userId != 0) {
+                        // item.setActionView(R.layout.progress);
+                        SizzleCreater t = new SizzleCreater(getActivity(), userId, newSizzle, bitmap);
+                        t.execute();
+                    }
+
+                    else {
+                        LogUtil.debug("triensharedUId", String.valueOf(userId));
+                    }
                 }
-                LogUtil.debug("addTrien", "aa");
 
-                // close fragment
-                mCallback.onCloseBtnClick();
+                // close fragment and reload markers/data
+                mCallback.onSnagItBtnClick();
             }
         });
 
@@ -193,15 +213,6 @@ public class AddSizzleFragment extends Fragment {
             // get LatLng details
             latLng = bundle.getParcelable(EXTRA_SELECTED_LAT_LNG);
         }
-    }
-
-    // triggers update of the details fragment
-    public void updateDetail(String uri) {
-        // create fake data
-        String newTime = String.valueOf(System.currentTimeMillis());
-        // send data to activity
-        // inform the Activity about the change based on interface definition
-        mCallback.onCloseBtnClick();
     }
 
     /**
@@ -242,10 +253,11 @@ public class AddSizzleFragment extends Fragment {
         // if we call super.onActivityResult here, this would trigger onActivityResult() from hosting activity
         //super.onActivityResult(requestCode, resultCode, data);
 
-        switch(requestCode) {
+        switch (requestCode) {
             case PICK_IMAGE_ID:
                 bitmap = ImagePickerUtil.getImageFromResult(getActivity(), resultCode, data);
                 setBitmapToImageBtn(addPhotoSmallBtn, bitmap);
+                addPhotoTv.setText("Change");
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);

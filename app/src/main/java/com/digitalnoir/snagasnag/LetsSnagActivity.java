@@ -38,7 +38,7 @@ public class LetsSnagActivity extends AppCompatActivity {
         String username = mSettings.getString("username", "missing");
         LogUtil.debug("trienshare", username);
         // if username exist, then go straight to map activity, otherwise create a username
-        if (!username.equals("missing")) {
+ /*       if (!username.equals("missing")) {
             letsSnagBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -54,6 +54,8 @@ public class LetsSnagActivity extends AppCompatActivity {
         else {
             Intent intent = new Intent(getApplicationContext(), TakeOathActivity.class);
             startActivity(intent);
-        }
+        }*/
+        Intent intent = new Intent(getApplicationContext(), TakeOathActivity.class);
+        startActivity(intent);
     }
 }

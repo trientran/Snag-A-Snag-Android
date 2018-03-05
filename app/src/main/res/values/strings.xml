@@ -25,7 +25,9 @@
     <string name="add_a_snag_cover_photo">Add a Snag cover photo</string>
     <string name="snag_it">Snag It</string>
     <string name="add_sizzle_alert">Select and hold the sizzle location</string>
-
+    <string name="toast_sizzle_name_empty">Sizzle name is empty</string>
+    <string name="toast_sizzle_address_empty">Address is empty</string>
+    <string name="toast_sizzle_detail_empty">Sizzle detail is empty</string>
 
     <!--    Let's nag   -->
     <string name="lets_snag">Let\'s snag</string>

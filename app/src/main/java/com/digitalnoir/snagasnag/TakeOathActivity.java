@@ -1,28 +1,19 @@
 package com.digitalnoir.snagasnag;
 
-import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import java.util.regex.Pattern;
-
 import static com.digitalnoir.snagasnag.utility.DataUtil.createNewUser;
+import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
+import static com.digitalnoir.snagasnag.utility.TextValidation.validateCommonInputText;
 
 public class TakeOathActivity extends AppCompatActivity {
 
@@ -59,58 +50,31 @@ public class TakeOathActivity extends AppCompatActivity {
 
     }
 
-
     /**
      * Handle Take the Oath button click. If the input username contain the word snag, then go to swear activity
      * if not, display a toast message to warn user
      */
     private void onTakeOathBtnClick() {
 
-        String username = String.valueOf(usernameInput.getText());
-        username = username.trim().replace("  ", " ");
+        // validate username with common pattern first
+        String username = validateCommonInputText(this, usernameInput, R.string.toast_username_empty);
 
-        // use this Regular Expression pattern to validate when required
-        Pattern pattern = Pattern.compile("[A-Za-z0-9 _]+");
-        boolean valid = (username != null) && pattern.matcher(username).matches();
+        if (isInternetConnected(this) && username != null) {
 
-        // Get a reference to the ConnectivityManager to check state of network connectivity
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
+            // check if username contain the word snag
+            if (!username.toLowerCase().contains("snag")) {
 
-        // Get details on the currently active default data network
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                Toast.makeText(this, getString(R.string.toast_username_lacking_snag), Toast.LENGTH_SHORT).show();
+            }
 
+            // If there is a network connection and text validation is ok then send a request to create username
+            else {
 
-        // validate input username
-        if (TextUtils.isEmpty(username)) {
-
-            Toast.makeText(this, getString(R.string.toast_username_empty), Toast.LENGTH_SHORT).show();
-        }
-
-        else if (!username.toLowerCase().contains("snag")) {
-
-            Toast.makeText(this, getString(R.string.toast_username_lacking_snag), Toast.LENGTH_SHORT).show();
-        }
-
-        else if (!valid) {
-
-            Toast.makeText(this, getString(R.string.toast_invalid_character), Toast.LENGTH_SHORT).show();
-        }
-
-        else if (!(networkInfo != null && networkInfo.isConnected())) {
-
-            Log.e(LOG_TAG, "Error loading, no internet connection");
-            Toast.makeText(this, getString(R.string.toast_check_internet), Toast.LENGTH_SHORT).show();
-        }
-
-
-        // If there is a network connection and text validation is ok then send a request to create username
-        else {
-
-            createNewUser(this, username);
-            Intent intent = new Intent(this, SwearActivity.class);
-            intent.putExtra(EXTRA_USER_NAME, username);
-            startActivity(intent);
+                createNewUser(this, username);
+                Intent intent = new Intent(this, SwearActivity.class);
+                intent.putExtra(EXTRA_USER_NAME, username);
+                startActivity(intent);
+            }
         }
     }
 

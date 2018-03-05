@@ -133,9 +133,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     private FrameLayout fragmentContainer;
 
-
-    private ImageButton refreshBtn;
-    private Button addSizzleAlertBtn;
+    private Button mAddSizzleAlertBtn;
 
     /* *************************************************************************************
      * Below is all declarations for Location service
@@ -305,13 +303,23 @@ public class MapsActivity extends AppCompatActivity implements
             }
         });
 
+
+
         mAddBtn = (ImageButton) findViewById(R.id.addBtn);
 
         fragmentContainer = (FrameLayout) findViewById(R.id.fragmentContainer);
-        addSizzleAlertBtn = (Button) findViewById(R.id.addSizzleAlertBtn);
+        mAddSizzleAlertBtn = (Button) findViewById(R.id.addSizzleAlertBtn);
 
 
-        refreshBtn = (ImageButton) findViewById(R.id.refreshBtn);
+        mRefreshBtn = (ImageButton) findViewById(R.id.refreshBtn);
+        mRefreshBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                onRefreshBtnClick();
+            }
+        });
+
 
         mAddBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -319,12 +327,12 @@ public class MapsActivity extends AppCompatActivity implements
 
                 LogUtil.debug("triensiz", String.valueOf(mSizzles));
 
-                if (addSizzleAlertBtn.getVisibility() == View.GONE) {
+                if (mAddSizzleAlertBtn.getVisibility() == View.GONE) {
                     mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
-                    addSizzleAlertBtn.setVisibility(View.VISIBLE);
+                    mAddSizzleAlertBtn.setVisibility(View.VISIBLE);
                 } else {
                     mAddBtn.setImageResource(R.drawable.ic_add_snag);
-                    addSizzleAlertBtn.setVisibility(View.GONE);
+                    mAddSizzleAlertBtn.setVisibility(View.GONE);
                 }
 
             }
@@ -415,6 +423,7 @@ public class MapsActivity extends AppCompatActivity implements
 
     }
 
+
     private void moveCameraToAustralia() {
         // move camera to Australia by default
         LatLngBounds bounds = new LatLngBounds.Builder()
@@ -498,6 +507,9 @@ public class MapsActivity extends AppCompatActivity implements
                         .title(sizzle.getName())
                         .snippet(sizzle.getAddress())
                         .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))).setTag(sizzle.getSizzleId());
+
+                // add all sizzles into mSizzles
+                mSizzles.add(sizzle);
             }
 
         } else {
@@ -510,7 +522,7 @@ public class MapsActivity extends AppCompatActivity implements
                         .snippet(sizzle.getAddress())
                         .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap)));
 
-                // build markers with sizzleIds tagged
+                // add all sizzles into mSizzles
                 mSizzles.add(sizzle);
 
             }
@@ -530,8 +542,16 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader<List<Sizzle>> loader) {
+        // clear all markers so the app reload updated data and recreate all markers
+        mMap.clear();
 
+        // clear sizzle list
         mSizzles = new ArrayList<>();
+    }
+
+    public void onRefreshBtnClick() {
+        // Called when the refresh button triggered. Restart loader to reload updated data and recreate all markers
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override
@@ -543,7 +563,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public void onMapLongClick(LatLng latLng) {
 
-        if (addSizzleAlertBtn.getVisibility() == View.VISIBLE) {
+        if (mAddSizzleAlertBtn.getVisibility() == View.VISIBLE) {
 
             // display views properly
             setUpViewsOnMapLongClick();
@@ -606,16 +626,14 @@ public class MapsActivity extends AppCompatActivity implements
             addSizzleFragment.setArguments(bundle);
 
         }
-
-
     }
 
     private void setUpViewsOnMapLongClick() {
 
         //fragmentContainer.setVisibility(View.VISIBLE);
         mAddBtn.setImageResource(R.drawable.ic_add_snag);
-        addSizzleAlertBtn.setVisibility(View.GONE);
-        refreshBtn.setVisibility(View.GONE);
+        mAddSizzleAlertBtn.setVisibility(View.GONE);
+        mRefreshBtn.setVisibility(View.GONE);
         mMyLocationBtn.setVisibility(View.GONE);
     }
 
@@ -1064,7 +1082,7 @@ public class MapsActivity extends AppCompatActivity implements
         LogUtil.debug("TrienGetPref2", username + " " + userId);
     }
 
-    // todo
+
     @Override
     public void onCloseBtnClick() {
 
@@ -1074,13 +1092,24 @@ public class MapsActivity extends AppCompatActivity implements
         getFragmentManager().beginTransaction()
                 .remove(addSizzleFragment).commit();
 
-        refreshBtn.setVisibility(View.VISIBLE);
+        // enable mRefreshBtn and mMyLocationBtn
+        mRefreshBtn.setVisibility(View.VISIBLE);
         mMyLocationBtn.setVisibility(View.VISIBLE);
 
         // remove all new temporary markers
         for (Marker marker : newMarkers) {
             marker.remove();
         }
+    }
+
+    @Override
+    public void onSnagItBtnClick() {
+
+        // remove fragment and adjust views accordingly
+        onCloseBtnClick();
+
+        // restart loader to reload updated data and recreate all markers
+        onRefreshBtnClick();
     }
 
 }

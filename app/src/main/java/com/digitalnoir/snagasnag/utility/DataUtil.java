@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -435,6 +437,26 @@ public class DataUtil {
         return sizzles;
     }
 
+    /**
+     * Helper method to check if the device is connected to the Internet
+     */
+    public static boolean isInternetConnected(Context context) {
 
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager)
+                (context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        if (!(networkInfo != null && networkInfo.isConnected())) {
+
+            Log.e(LOG_TAG, "Error loading, no internet connection");
+            Toast.makeText(context, context.getString(R.string.toast_check_internet), Toast.LENGTH_SHORT).show();
+
+            return false;
+        }
+
+        return true;
+    }
 
 }
