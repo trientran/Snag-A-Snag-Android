@@ -128,9 +128,9 @@ public class DataUtil {
     /**
      * Create sizzle
      */
-    public static void createNewSizzle(WeakReference<Context> mWeakContext, int userId, Sizzle newSizzle, Bitmap bitmap) {
+    public static int createNewSizzle(WeakReference<Context> mWeakContext, int userId, Sizzle newSizzle, Bitmap bitmap) {
 
-       // int sizzleId = 0;
+        int sizzleId = 0;
 
         String url = SIZZLE_BASE_URL + CREATE_SIZZLE_URL_TAG;
 
@@ -159,14 +159,14 @@ public class DataUtil {
 
             // parse response and get the new sizzle Id
             String response = client.getResponse();
-           // sizzleId = parseSizzleCreationResponse(mWeakContext, response);
+            sizzleId = parseSizzleCreationResponse(mWeakContext, response);
 
-            Log.d("triennewSIzzle", response);
+            Log.d("triennewSIzzle", sizzleId + response);
         } catch (Throwable t) {
             t.printStackTrace();
         }
 
-        //return sizzleId;
+        return sizzleId;
     }
 
     /**

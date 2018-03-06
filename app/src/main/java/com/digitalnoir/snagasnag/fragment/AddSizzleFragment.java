@@ -180,7 +180,7 @@ public class AddSizzleFragment extends Fragment {
 
                 // close fragment and reload markers/data
                 mCallback.onSnagItBtnClick(newSizzle);
-                LogUtil.debug("trienzzz", String.valueOf(newSizzle.getSizzleId()));
+                LogUtil.debug("trienzzz", String.valueOf(t.aaa));
             }
 
             else {

@@ -575,7 +575,7 @@ public class MapsActivity extends AppCompatActivity implements
             setUpViewsOnMapLongClick();
 
             // create a new marker with yellow icon on selected position, add it to newTempMarkers list
-            newTempMarkers.add(addMarker(latLng, tempMarker));
+            newTempMarkers.add(addTempMarker(latLng));
 
             // move camera to the selected location but adjust the marker to show on top of
             // Create Sizzle popup window
@@ -647,20 +647,25 @@ public class MapsActivity extends AppCompatActivity implements
      * AddMarker method. If adding temporary one, create a marker with yello snag pin icon
      * If a permanent one, pick the blue one
      */
-    private Marker addMarker( Sizzle sizzle, boolean tempMarker) {
+    private Marker addTempMarker(LatLng latLng) {
 
         Marker newMarker;
 
-        if (tempMarker) {
-
             newMarker  = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
+                    .position(latLng)
                     .title("selected location")
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
 
-        }
+        return newMarker;
+    }
 
-        else {
+    /**
+     * AddMarker method. If adding temporary one, create a marker with yello snag pin icon
+     * If a permanent one, pick the blue one
+     */
+    private Marker addPermanentMarker(Sizzle sizzle) {
+
+        Marker newMarker;
 
             newMarker  =  mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
@@ -669,7 +674,6 @@ public class MapsActivity extends AppCompatActivity implements
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin))));
 
             newMarker.setTag(sizzle);
-        }
 
         return newMarker;
     }
@@ -1134,7 +1138,7 @@ public class MapsActivity extends AppCompatActivity implements
         onCloseBtnClick();
 
         // create a new permanent marker on the selected location
-        addMarker(sizzle, !tempMarker);
+        addPermanentMarker(sizzle);
 
         onRefreshBtnClick();
     }
