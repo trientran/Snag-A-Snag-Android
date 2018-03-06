@@ -11,39 +11,42 @@
         android:layout_height="70dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:background="@drawable/add_sizzle_header"
+        android:background="@drawable/sizzle_detail_header"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/dartImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:padding="12dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_default_sizzle" />
-
-        <TextView
-            android:id="@+id/addSizzleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:id="@+id/snagAvatar"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="w,1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_snag_avatar" />
+
+        <TextView
+            android:id="@+id/sizzleTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@string/add_a_sizzle"
+            android:textColor="@color/White"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/dartImage"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/closeBtn"
+            app:layout_constraintStart_toEndOf="@+id/snagAvatar"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/sizzle_title" />
 
         <ImageButton
-            android:id="@+id/cancelBtn"
+            android:id="@+id/closeBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -81,144 +84,330 @@
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true">
 
-                <TextView
-                    android:id="@+id/noteLabel"
+                <ImageView
+                    android:id="@+id/blueDartIcon"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="40dp"
-                    android:layout_marginStart="40dp"
-                    android:layout_marginTop="16dp"
-                    android:singleLine="false"
-                    android:text="@string/add_sizzle_note"
-                    android:textColor="@color/textColorDarkGrey"
-                    android:textSize="14sp"
-                    android:textStyle="italic"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <EditText
-                    android:id="@+id/nameEditText"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="27dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginStart="20dp"
                     android:layout_marginTop="20dp"
-                    android:background="@drawable/add_sizzle_edit_text"
-                    android:ems="10"
-                    android:hint="@string/hint_sizzle_name"
-                    android:inputType="textCapWords"
-                    android:paddingLeft="15dp"
-                    android:paddingStart="15dp"
-                    android:textSize="16sp"
-                    android:textStyle="bold|italic"
-                    android:maxLines="1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/noteLabel" />
-
-                <EditText
-                    android:id="@+id/addressEditText"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/add_sizzle_edit_text"
-                    android:ems="10"
-                    android:hint="@string/hint_sizzle_address"
-                    android:inputType="textPostalAddress"
-                    android:paddingLeft="15dp"
-                    android:paddingStart="15dp"
-                    android:textSize="16sp"
-                    android:textStyle="bold|italic"
-                    android:maxLines="1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/nameEditText" />
-
-                <EditText
-                    android:id="@+id/descEditText"
-                    android:layout_width="0dp"
-                    android:layout_height="130dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/add_sizzle_edit_text"
-                    android:ems="10"
-                    android:hint="@string/hint_sizzle_desc"
-                    android:inputType="textCapSentences"
-                    android:paddingBottom="80dp"
-                    android:paddingLeft="15dp"
-                    android:paddingStart="15dp"
-                    android:textSize="16sp"
-                    android:textStyle="bold|italic"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/addressEditText" />
-
-
-                <ImageButton
-                    android:id="@+id/addPicSmallBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/add_sizzle_plus_icon"
                     android:scaleType="fitCenter"
                     app:layout_constraintDimensionRatio="w,1:1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/descEditText"
-                    app:srcCompat="@drawable/ic_plus" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_dart_blue" />
 
                 <TextView
-                    android:id="@+id/addPhotoTv"
+                    android:id="@+id/addressTv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/textColorDarkGrey"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/blueDartIcon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/blueDartIcon"
+                    app:layout_constraintTop_toTopOf="@+id/blueDartIcon"
+                    tools:text="@string/sizzle_address" />
+
+                <TextView
+                    android:id="@+id/snagScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:singleLine="false"
+                    android:text="@string/snag_score"
+                    android:textColor="@color/blueDark"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/blueDartIcon" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/snagScoreConstraintLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="180dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/add_sizzle_edit_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/snagScore">
+
+                    <ImageView
+                        android:id="@+id/sausageImg"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:scaleType="fitCenter"
+                        app:layout_constraintDimensionRatio="w,1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/ic_sausage" />
+
+                    <ImageView
+                        android:id="@+id/breadImg"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="fitCenter"
+                        app:layout_constraintDimensionRatio="w,1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/sausageImg"
+                        app:srcCompat="@drawable/ic_bread" />
+
+                    <ImageView
+                        android:id="@+id/onionImg"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="fitCenter"
+                        app:layout_constraintDimensionRatio="w,1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/breadImg"
+                        app:srcCompat="@drawable/ic_onion" />
+
+                    <ImageView
+                        android:id="@+id/sauceImg"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="fitCenter"
+                        app:layout_constraintBottom_toBottomOf="@+id/snagScoreConstraintLayout"
+                        app:layout_constraintDimensionRatio="w,1:1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/onionImg"
+                        app:srcCompat="@drawable/ic_sauce" />
+
+                    <TextView
+                        android:id="@+id/sausageTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/sausage"
+                        app:layout_constraintBottom_toBottomOf="@+id/sausageImg"
+                        app:layout_constraintStart_toEndOf="@+id/sausageImg"
+                        app:layout_constraintTop_toTopOf="@+id/sausageImg" />
+
+                    <TextView
+                        android:id="@+id/breadTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/bread"
+                        app:layout_constraintBottom_toBottomOf="@+id/breadImg"
+                        app:layout_constraintStart_toEndOf="@+id/breadImg"
+                        app:layout_constraintTop_toTopOf="@+id/breadImg" />
+
+                    <TextView
+                        android:id="@+id/onionTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/onion"
+                        app:layout_constraintBottom_toBottomOf="@+id/onionImg"
+                        app:layout_constraintStart_toEndOf="@+id/onionImg"
+                        app:layout_constraintTop_toTopOf="@+id/onionImg" />
+
+                    <TextView
+                        android:id="@+id/sauceTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/sauce"
+                        app:layout_constraintBottom_toBottomOf="@+id/sauceImg"
+                        app:layout_constraintStart_toEndOf="@+id/sauceImg"
+                        app:layout_constraintTop_toTopOf="@+id/sauceImg" />
+
+                    <TextView
+                        android:id="@+id/sausageScoreTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/sausageTv"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="5/5" />
+
+                    <TextView
+                        android:id="@+id/breadScoreTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/breadTv"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="1/5" />
+
+                    <TextView
+                        android:id="@+id/onionScoreTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/onionTv"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="2/5" />
+
+                    <TextView
+                        android:id="@+id/sauceScoreTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/sauceTv"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        tools:text="1/5" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/overallScoreConstraintLayout"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_marginLeft="16dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/add_a_snag_cover_photo"
-                    android:textAppearance="@style/TitleTextStyle"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/addPicSmallBtn"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/addPicSmallBtn"
-                    app:layout_constraintTop_toTopOf="@+id/addPicSmallBtn" />
-
-                <Button
-                    android:id="@+id/addPicBigBtn"
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="@+id/addPicSmallBtn"
-                    app:layout_constraintEnd_toEndOf="@+id/addPhotoTv"
-                    app:layout_constraintStart_toStartOf="@+id/addPicSmallBtn"
-                    app:layout_constraintTop_toTopOf="@+id/addPicSmallBtn" />
+                    android:background="@drawable/add_sizzle_edit_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/snagScoreConstraintLayout">
+
+
+                    <TextView
+                        android:id="@+id/overallScoreTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/overall_score"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="8dp"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="4.2/5" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/commentTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/comments"
+                    android:textColor="@color/blueDark"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/overallScoreConstraintLayout" />
+
+                <ImageView
+                    android:id="@+id/commentImg"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="8dp"
+                    android:scaleType="fitCenter"
+                    app:layout_constraintBottom_toBottomOf="@+id/commentTv"
+                    app:layout_constraintDimensionRatio="w,1:1"
+                    app:layout_constraintStart_toEndOf="@+id/commentTv"
+                    app:layout_constraintTop_toTopOf="@+id/commentTv"
+                    app:srcCompat="@drawable/ic_comment" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/commentRecyclerView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/commentTv" />
 
                 <View
-                    android:id="@+id/viewScale"
+                    android:id="@+id/guideLine"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginTop="10dp"
-                    android:visibility="gone"
+                    android:layout_height="2dp"
+                    android:layout_marginStart="1dp"
+                    android:layout_marginTop="24dp"
+                    android:background="@color/greyLight"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/commentRecyclerView"
+                    android:layout_marginLeft="1dp" />
+
+
+                <EditText
+                    android:id="@+id/commentEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:ems="10"
+                    android:hint="@string/hint_type_here"
+                    android:inputType="textCapSentences"
+                    android:paddingLeft="15dp"
+                    android:paddingStart="15dp"
+                    android:textColor="@color/bottomGrey"
+                    android:textSize="16sp"
+                    android:textStyle="italic"
+                    android:background="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/guideLine" />
+
+                <Button
+                    android:id="@+id/commentBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/commentBtnBg"
+                    android:text="@string/comment"
+                    android:textAppearance="@style/TitleTextStyle"
+                    android:textColor="@color/White"
+                    android:textSize="20sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/addPicBigBtn" />
-
+                    app:layout_constraintTop_toBottomOf="@+id/commentEditText" />
 
             </android.support.constraint.ConstraintLayout>
 
@@ -228,13 +417,13 @@
 
     <Button
         android:id="@+id/snagItBottom"
-        android:text="@string/snag_it"
-        android:textAppearance="@style/TitleTextStyle"
-        android:textSize="20sp"
-        android:textColor="@color/brownLight"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="@drawable/popup_bottom_yellow"
+        android:text="@string/rate"
+        android:textAppearance="@style/TitleTextStyle"
+        android:textColor="@color/brownLight"
+        android:textSize="20sp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.digitalnoir.snagasnag.model.Sizzle;
 import java.lang.ref.WeakReference;
 import static com.digitalnoir.snagasnag.utility.DataUtil.createNewSizzle;
+import static com.digitalnoir.snagasnag.utility.DataUtil.parseSizzleCreationResponse;
 
 /**
  * Created by Troy on 3/5/2018.
@@ -37,5 +38,7 @@ public class SizzleCreater extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String data) {
 
+        mNewSizzle.setSizzleId(parseSizzleCreationResponse(mWeakContext, data));
     }
+
 }

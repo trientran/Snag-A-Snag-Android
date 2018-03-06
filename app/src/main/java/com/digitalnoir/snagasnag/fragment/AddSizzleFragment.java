@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,17 +22,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.R;
-import com.digitalnoir.snagasnag.SwearActivity;
 import com.digitalnoir.snagasnag.model.Sizzle;
 import com.digitalnoir.snagasnag.utility.ImagePickerUtil;
 import com.digitalnoir.snagasnag.utility.LogUtil;
 import com.digitalnoir.snagasnag.utility.SizzleCreater;
 import com.google.android.gms.maps.model.LatLng;
 
-import static com.digitalnoir.snagasnag.utility.DataUtil.createNewUser;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.ImagePickerUtil.getPickImageIntent;
-import static com.digitalnoir.snagasnag.utility.TextValidation.validateCommonInputText;
+import static com.digitalnoir.snagasnag.utility.TextValidation.validateEmptyText;
+import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
 
 /**
  * AddSizzleFragment controls Add sizzle popup window (fragment_add_sizzle)
@@ -58,7 +56,6 @@ public class AddSizzleFragment extends Fragment {
     private Button snagItBottom;
     private ImageButton closeBtn;
 
-    private Button addPhotoBigBtn;
     private ImageButton addPhotoSmallBtn;
     private TextView addPhotoTv;
 
@@ -77,7 +74,7 @@ public class AddSizzleFragment extends Fragment {
     public interface OnCloseBtnClickListener {
         void onCloseBtnClick();
 
-        void onSnagItBtnClick();
+        void onSnagItBtnClick(Sizzle sizzle);
     }
 
     @Override
@@ -102,28 +99,16 @@ public class AddSizzleFragment extends Fragment {
         detailEditText = (EditText) view.findViewById(R.id.descEditText);
 
         snagItBottom = (Button) view.findViewById(R.id.snagItBottom);
-        closeBtn = (ImageButton) view.findViewById(R.id.cancelBtn);
+        closeBtn = (ImageButton) view.findViewById(R.id.closeBtn);
 
-        addPhotoBigBtn = (Button) view.findViewById(R.id.addPicBigBtn);
         addPhotoSmallBtn = (ImageButton) view.findViewById(R.id.addPicSmallBtn);
         addPhotoTv = (TextView) view.findViewById(R.id.addPhotoTv);
-
-        addPhotoBigBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // showFileChooser();
-                LogUtil.debug("addTrien", "aa");
-            }
-        });
 
         addPhotoSmallBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Intent chooseImageIntent = getPickImageIntent(getActivity());
-                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
-                LogUtil.debug("addTrien", "aa");
+                addCoverPhoto();
             }
         });
 
@@ -131,9 +116,7 @@ public class AddSizzleFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                Intent chooseImageIntent = getPickImageIntent(getActivity());
-                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
-                LogUtil.debug("addTrien", "aa");
+                addCoverPhoto();
             }
         });
 
@@ -141,42 +124,8 @@ public class AddSizzleFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                // retrieve userId from SharedPreferences
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                int userId = prefs.getInt("userId", 0);
-
-
-                // create a new sizzle instance
-                Double lat = latLng.latitude;
-                Double lng = latLng.longitude;
-
-                // validate username with common pattern first
-                String sizzleName = validateCommonInputText(getActivity(), sizzleNameEditText, R.string.toast_sizzle_name_empty);
-
-                String address = validateCommonInputText(getActivity(), addressEditText, R.string.toast_sizzle_address_empty);
-
-                String desc = validateCommonInputText(getActivity(), detailEditText, R.string.toast_sizzle_detail_empty);
-
-                if (isInternetConnected(getActivity()) && sizzleName != null && address != null && desc != null) {
-
-                    // If there is a network connection and text validation is ok then send a request to create sizzle
-
-                    Sizzle newSizzle = new Sizzle(String.valueOf(lat), String.valueOf(lng), sizzleName, address, desc);
-
-                    // if userId exist, then go straight to creating a new sizzle
-                    if (userId != 0) {
-                        // item.setActionView(R.layout.progress);
-                        SizzleCreater t = new SizzleCreater(getActivity(), userId, newSizzle, bitmap);
-                        t.execute();
-                    }
-
-                    else {
-                        LogUtil.debug("triensharedUId", String.valueOf(userId));
-                    }
-                }
-
-                // close fragment and reload markers/data
-                mCallback.onSnagItBtnClick();
+                // create sizzle from input fields
+                createSizzle();
             }
         });
 
@@ -198,6 +147,52 @@ public class AddSizzleFragment extends Fragment {
         }
 
         return view;
+    }
+
+    private void createSizzle() {
+        // retrieve userId from SharedPreferences
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int userId = prefs.getInt("userId", 0);
+
+
+        // create a new sizzle instance
+        Double lat = latLng.latitude;
+        Double lng = latLng.longitude;
+
+        // validate username with common pattern first
+        String sizzleName = validateTextWithPattern(getActivity(), sizzleNameEditText, getActivity().getString(R.string.sizzle_name_field_name));
+
+        String address = validateEmptyText(getActivity(), addressEditText, getActivity().getString(R.string.sizzle_address_field_name));
+
+        String desc = validateTextWithPattern(getActivity(), detailEditText, getActivity().getString(R.string.sizzle_desc_field_name));
+
+        if (isInternetConnected(getActivity()) && sizzleName != null && address != null && desc != null) {
+
+            // If there is a network connection and text validation is ok then send a request to create sizzle
+
+            Sizzle newSizzle = new Sizzle(String.valueOf(lat), String.valueOf(lng), sizzleName, address, desc);
+
+            // if userId exist, then go straight to creating a new sizzle
+            if (userId != 0) {
+                // item.setActionView(R.layout.progress);
+                SizzleCreater t = new SizzleCreater(getActivity(), userId, newSizzle, bitmap);
+                t.execute();
+
+                // close fragment and reload markers/data
+                mCallback.onSnagItBtnClick(newSizzle);
+                LogUtil.debug("trienzzz", String.valueOf(newSizzle.getSizzleId()));
+            }
+
+            else {
+                LogUtil.debug("triensharedUId", String.valueOf(userId));
+            }
+        }
+    }
+
+    private void addCoverPhoto() {
+        Intent chooseImageIntent = getPickImageIntent(getActivity());
+        startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+        LogUtil.debug("addTrien", "aa");
     }
 
     @Override
@@ -257,13 +252,12 @@ public class AddSizzleFragment extends Fragment {
             case PICK_IMAGE_ID:
                 bitmap = ImagePickerUtil.getImageFromResult(getActivity(), resultCode, data);
                 setBitmapToImageBtn(addPhotoSmallBtn, bitmap);
-                addPhotoTv.setText("Change");
+                addPhotoTv.setText(getActivity().getResources().getString(R.string.change_snag_cover_photo));
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;
         }
-
     }
 
     private void setBitmapToImageBtn(ImageButton imageBtn, Bitmap bitmap) {

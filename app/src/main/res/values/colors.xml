@@ -2,20 +2,22 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#40CFFE</color>
     <color name="bgYellow">#FFE378</color>
     <color name="greyDark">#696969</color>
     <color name="greyLight">#e5e5e5</color>
     <color name="editTextBackGround">#F9FBFA</color>
     <color name="textColorDarkGrey">#0D3142</color>
     <color name="bgBlue">#40CFFE</color>
-    <color name="blueDark">#27A7D1</color>
+    <color name="blueMedium">#27A7D1</color>
     <color name="yellowDark">#DCBA37</color>
     <color name="White">#ffffff</color>
     <color name="brownLight">#8A793D</color>
     <color name="bottomGrey">#16323B</color>
     <color name="bottomGreyStroke">#122B34</color>
     <color name="black">#000000</color>
+    <color name="blueDark">#0f576e</color>
+    <color name="commentBtnBg">#152A45</color>
 
 </resources>
 

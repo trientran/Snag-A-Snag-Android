@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
 public class TextValidation {
 
     /**
-     * Helper method to validate some common input text (username, sizzle name...)
+     * Helper method to validate some common input text (username, sizzle name...) with pattern "[A-Za-z0-9 _]+"
      */
-    public static String validateCommonInputText(Context context, EditText inputText, int toastMsgId) {
+    public static String validateTextWithPattern(Context context, EditText inputText, String fieldName) {
 
         // first get value of input text and clear redundant space
         String text = String.valueOf(inputText.getText());
@@ -32,7 +32,7 @@ public class TextValidation {
         if (TextUtils.isEmpty(text)) {
 
             text = null;
-            Toast.makeText(context, context.getString(toastMsgId), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, fieldName + " " + context.getString(R.string.toast_text_empty), Toast.LENGTH_SHORT).show();
             //Toast.makeText(this, getString(R.string.toast_username_empty), Toast.LENGTH_SHORT).show();
         }
 
@@ -40,12 +40,32 @@ public class TextValidation {
         else if (!valid) {
 
             text = null;
-            Toast.makeText(context, context.getString(R.string.toast_invalid_character), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, fieldName + " " + context.getString(R.string.toast_invalid_character), Toast.LENGTH_SHORT).show();
         }
 
         else {
 
             return text;
+        }
+
+        return text;
+    }
+
+    /**
+     * Helper method to validate empty input text (allowing special character) (applied to address...)
+     */
+    public static String validateEmptyText(Context context, EditText inputText, String fieldName) {
+
+        // first get value of input text and clear redundant space
+        String text = String.valueOf(inputText.getText());
+        text = text.trim().replace("  ", " ");
+
+        // validate if the text is empty
+        if (TextUtils.isEmpty(text)) {
+
+            text = null;
+            Toast.makeText(context, fieldName + " " + context.getString(R.string.toast_text_empty), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, getString(R.string.toast_username_empty), Toast.LENGTH_SHORT).show();
         }
 
         return text;

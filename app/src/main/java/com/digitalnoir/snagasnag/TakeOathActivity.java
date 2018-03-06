@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 import static com.digitalnoir.snagasnag.utility.DataUtil.createNewUser;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
-import static com.digitalnoir.snagasnag.utility.TextValidation.validateCommonInputText;
+import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
 
 public class TakeOathActivity extends AppCompatActivity {
 
@@ -57,7 +57,7 @@ public class TakeOathActivity extends AppCompatActivity {
     private void onTakeOathBtnClick() {
 
         // validate username with common pattern first
-        String username = validateCommonInputText(this, usernameInput, R.string.toast_username_empty);
+        String username = validateTextWithPattern(this, usernameInput, getString(R.string.username_field_name));
 
         if (isInternetConnected(this) && username != null) {
 

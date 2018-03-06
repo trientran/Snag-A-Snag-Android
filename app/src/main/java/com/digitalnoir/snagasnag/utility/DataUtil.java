@@ -130,11 +130,14 @@ public class DataUtil {
      */
     public static void createNewSizzle(WeakReference<Context> mWeakContext, int userId, Sizzle newSizzle, Bitmap bitmap) {
 
+       // int sizzleId = 0;
+
         String url = SIZZLE_BASE_URL + CREATE_SIZZLE_URL_TAG;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         if (bitmap == null) {
+            // call mWeakContext.get() to get main context
             bitmap = BitmapFactory.decodeResource(mWeakContext.get().getResources(), R.drawable.ic_default_sizzle);
         }
         else {
@@ -153,11 +156,17 @@ public class DataUtil {
             client.addFormPart("details", newSizzle.getDetail());
             client.addFilePart("photo", "unnamed-file.png", baos.toByteArray());
             client.finishMultipart();
-            String data = client.getResponse();
-            Log.d("trien", data);
+
+            // parse response and get the new sizzle Id
+            String response = client.getResponse();
+           // sizzleId = parseSizzleCreationResponse(mWeakContext, response);
+
+            Log.d("triennewSIzzle", response);
         } catch (Throwable t) {
             t.printStackTrace();
         }
+
+        //return sizzleId;
     }
 
     /**
@@ -267,10 +276,29 @@ public class DataUtil {
         if (response.contains("user_id")) {
             // After sending post method to create new user, the http response format will be: {"user_id":1076}
             // We extract userId here
-            String userId = response.split(":")[1];
-            return Integer.parseInt(userId.substring(0, userId.length() - 1));
+            String text = response.split(":")[1];
+            return Integer.parseInt(text.substring(0, text.length() - 1));
         } else {
             Toast.makeText(context, "Error creating username", Toast.LENGTH_SHORT).show();
+            return 0;
+        }
+
+    }
+
+    /**
+     * handle User Creation Response
+     */
+    public static int parseSizzleCreationResponse(WeakReference<Context> context, String response) {
+
+        if (response.contains("sizzle_id")) {
+            // After sending post method to create new user, the http response format will be: {"user_id":1076}
+            // We extract sizzle Id here
+            String text1 = response.split("}")[0];
+            String text2 = text1.split(":")[1];
+            return Integer.parseInt(text2);
+        } else {
+            // call mWeakContext.get() to get main context
+            Toast.makeText(context.get(), "Error creating new sizzle", Toast.LENGTH_SHORT).show();
             return 0;
         }
 

@@ -245,7 +245,12 @@ public class MapsActivity extends AppCompatActivity implements
     /**
      * current marker (on map long click)
      */
-    private List<Marker> newMarkers = new ArrayList<>();
+    private List<Marker> newTempMarkers = new ArrayList<>();
+
+    /**
+     * current marker (on map long click)
+     */
+    private boolean tempMarker = true;
 
     /**
      * GeoDataClient object
@@ -506,9 +511,10 @@ public class MapsActivity extends AppCompatActivity implements
                         .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
                         .title(sizzle.getName())
                         .snippet(sizzle.getAddress())
-                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))).setTag(sizzle.getSizzleId());
+                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))).setTag(sizzle);
 
                 // add all sizzles into mSizzles
+
                 mSizzles.add(sizzle);
             }
 
@@ -542,15 +548,15 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public void onLoaderReset(Loader<List<Sizzle>> loader) {
-        // clear all markers so the app reload updated data and recreate all markers
-        mMap.clear();
-
         // clear sizzle list
-        mSizzles = new ArrayList<>();
+         mSizzles = new ArrayList<>();
     }
 
     public void onRefreshBtnClick() {
-        // Called when the refresh button triggered. Restart loader to reload updated data and recreate all markers
+        // clear all markers so the app reload updated data and recreate all markers
+        mMap.clear();
+
+        // Restart loader to reload updated data and recreate all markers
         getLoaderManager().restartLoader(0, null, this);
     }
 
@@ -568,8 +574,8 @@ public class MapsActivity extends AppCompatActivity implements
             // display views properly
             setUpViewsOnMapLongClick();
 
-            // create a new marker on selected position, add it to newMarkers list
-            newMarkers.add(addMarker(latLng));
+            // create a new marker with yellow icon on selected position, add it to newTempMarkers list
+            newTempMarkers.add(addMarker(latLng, tempMarker));
 
             // move camera to the selected location but adjust the marker to show on top of
             // Create Sizzle popup window
@@ -638,17 +644,36 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     /**
-     * Add a marker method.
+     * AddMarker method. If adding temporary one, create a marker with yello snag pin icon
+     * If a permanent one, pick the blue one
      */
-    private Marker addMarker(LatLng latLng) {
+    private Marker addMarker( Sizzle sizzle, boolean tempMarker) {
 
-        Marker newMarker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title("selected location")
-                .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
+        Marker newMarker;
+
+        if (tempMarker) {
+
+            newMarker  = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
+                    .title("selected location")
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
+
+        }
+
+        else {
+
+            newMarker  =  mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
+                    .title(sizzle.getName())
+                    .snippet(sizzle.getAddress())
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin))));
+
+            newMarker.setTag(sizzle);
+        }
 
         return newMarker;
     }
+
 
     /**
      * Updates fields based on data stored in the bundle.
@@ -1097,18 +1122,20 @@ public class MapsActivity extends AppCompatActivity implements
         mMyLocationBtn.setVisibility(View.VISIBLE);
 
         // remove all new temporary markers
-        for (Marker marker : newMarkers) {
+        for (Marker marker : newTempMarkers) {
             marker.remove();
         }
     }
 
     @Override
-    public void onSnagItBtnClick() {
+    public void onSnagItBtnClick(Sizzle sizzle) {
 
         // remove fragment and adjust views accordingly
         onCloseBtnClick();
 
-        // restart loader to reload updated data and recreate all markers
+        // create a new permanent marker on the selected location
+        addMarker(sizzle, !tempMarker);
+
         onRefreshBtnClick();
     }
 
