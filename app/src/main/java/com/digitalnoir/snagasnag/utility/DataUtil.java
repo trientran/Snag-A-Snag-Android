@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.digitalnoir.snagasnag.R;
+import com.digitalnoir.snagasnag.model.Rating;
 import com.digitalnoir.snagasnag.model.Sizzle;
 
 import org.json.JSONArray;
@@ -466,6 +467,49 @@ public class DataUtil {
                 // Extract the value for the key called "img"
                 String photoUrl = currentSizzle.getString("img");
 
+                /* *******************************************
+                Extract the value for the key called "rating" */
+                JSONObject ratingObject = currentSizzle.getJSONObject("rating");
+
+                // Extract the value for the key called "sausage"
+                int sausage = ratingObject.getInt("sausage");
+
+                // Extract the value for the key called "bread"
+                int bread = ratingObject.getInt("bread");
+
+                // Extract the value for the key called "onion"
+                int onion = ratingObject.getInt("onion");
+
+                // Extract the value for the key called "sauce"
+                int sauce = ratingObject.getInt("sauce");
+
+                // Extract the value for the key called "aggregate_rating"
+                int aggregateRating = ratingObject.getInt("aggregate_rating");
+
+                // now we can create a Rating object
+                Rating rating = new Rating(sausage, bread, onion, sauce);
+
+                /* *******************************************
+                Extract the value for the key called "comments" */
+                JSONArray commentArray = currentSizzle.getJSONArray("comments");
+
+
+                // For each sizzle in the sizzleArray, create an {@link Sizzle} object
+                for (int a = 0; a < commentArray.length(); a++) {
+
+                    JSONObject commentObject = commentArray.getJSONObject(i);
+
+                    // Extract the value for the key called "username"
+                    String username = commentObject.getString("username");
+
+                    // Extract the value for the key called "date"
+                    String date = commentObject.getString("date");
+
+                    // Extract the value for the key called "sauce"
+                    String comment = commentObject.getString("comment");
+
+
+                }
                 // Create a new {@link Sizzle} object with the magnitude, location, time,
                 // and url from the JSON response.
                 Sizzle sizzle = new Sizzle(sizzleId, latitude, longitude, name, address, detail, photoUrl);

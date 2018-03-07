@@ -8,12 +8,20 @@ public class Rating {
 
     private int userId;
     private int sizzleId;
-    private String sausage;
-    private String bread;
-    private String onion;
-    private String sauce;
+    private int sausage;
+    private int bread;
+    private int onion;
+    private int sauce;
 
-    public Rating(int userId, int sizzleId, String sausage, String bread, String onion, String sauce) {
+
+    public Rating(int sausage, int bread, int onion, int sauce) {
+        this.sausage = sausage;
+        this.bread = bread;
+        this.onion = onion;
+        this.sauce = sauce;
+    }
+
+    public Rating(int userId, int sizzleId, int sausage, int bread, int onion, int sauce) {
         this.userId = userId;
         this.sizzleId = sizzleId;
         this.sausage = sausage;
@@ -38,35 +46,35 @@ public class Rating {
         this.sizzleId = sizzleId;
     }
 
-    public String getSausage() {
+    public int getSausage() {
         return sausage;
     }
 
-    public void setSausage(String sausage) {
+    public void setSausage(int sausage) {
         this.sausage = sausage;
     }
 
-    public String getBread() {
+    public int getBread() {
         return bread;
     }
 
-    public void setBread(String bread) {
+    public void setBread(int bread) {
         this.bread = bread;
     }
 
-    public String getOnion() {
+    public int getOnion() {
         return onion;
     }
 
-    public void setOnion(String onion) {
+    public void setOnion(int onion) {
         this.onion = onion;
     }
 
-    public String getSauce() {
+    public int getSauce() {
         return sauce;
     }
 
-    public void setSauce(String sauce) {
+    public void setSauce(int sauce) {
         this.sauce = sauce;
     }
 }
