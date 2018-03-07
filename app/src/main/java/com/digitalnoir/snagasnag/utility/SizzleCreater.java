@@ -19,7 +19,7 @@ public class SizzleCreater extends AsyncTask<String, Void, String> {
     private int mUserId;
     private Sizzle mNewSizzle;
     private Bitmap mBitmap;
-    public  static int aaa;
+
 
     public SizzleCreater(Context context, int userId, Sizzle newSizzle, Bitmap bitmap) {
         mWeakContext = new WeakReference<>(context);
@@ -31,15 +31,13 @@ public class SizzleCreater extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
 
-        aaa = (createNewSizzle(mWeakContext, mUserId, mNewSizzle, mBitmap));
-
+        createNewSizzle(mWeakContext, mUserId, mNewSizzle, mBitmap);
 
         return null;
     }
 
     @Override
     protected void onPostExecute(String data) {
-
 
     }
 

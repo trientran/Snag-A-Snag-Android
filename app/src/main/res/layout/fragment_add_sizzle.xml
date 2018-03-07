@@ -66,7 +66,7 @@
         android:layout_marginStart="16dp"
         android:background="@drawable/add_sizzle_body"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/snagItBottom"
+        app:layout_constraintBottom_toTopOf="@+id/rateBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/header">
@@ -226,7 +226,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <Button
-        android:id="@+id/snagItBottom"
+        android:id="@+id/rateBtn"
         android:text="@string/snag_it"
         android:textAppearance="@style/TitleTextStyle"
         android:textSize="20sp"

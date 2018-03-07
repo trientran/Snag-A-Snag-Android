@@ -36,6 +36,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.fragment.AddSizzleFragment;
+import com.digitalnoir.snagasnag.fragment.SizzleDetailFragment;
 import com.digitalnoir.snagasnag.model.Sizzle;
 import com.digitalnoir.snagasnag.utility.LogUtil;
 import com.digitalnoir.snagasnag.utility.PermissionUtils;
@@ -74,8 +75,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import static com.digitalnoir.snagasnag.fragment.AddSizzleFragment.EXTRA_SELECTED_ADDRESS;
-import static com.digitalnoir.snagasnag.fragment.AddSizzleFragment.EXTRA_SELECTED_LAT_LNG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.DISPLAY_SIZZLE_URL_TAG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.SIZZLE_BASE_URL;
 
@@ -88,12 +87,21 @@ public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        AddSizzleFragment.OnCloseBtnClickListener {
+        AddSizzleFragment.OnAddSizzleButtonsClickListener,
+        SizzleDetailFragment.OnSizzleDetailButtonsClickListener{
 
     /**
      * Tag for log messages
      */
     private static final String LOG_TAG = MapsActivity.class.getName();
+
+    private static final String NEW_SIZZLE_TITLE_TAG = "new sizzle";
+
+    public static final String EXTRA_SELECTED_ADDRESS = "selected_address";
+
+    public static final String EXTRA_SELECTED_LAT_LNG = "selected_lat_lng";
+
+    public static final String EXTRA_SELECTED_SIZZLE = "selected_address";
 
     /**
      * List of sizzles
@@ -330,9 +338,10 @@ public class MapsActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
 
-                LogUtil.debug("triensiz", String.valueOf(mSizzles));
-
                 if (mAddSizzleAlertBtn.getVisibility() == View.GONE) {
+                    // refresh the map and loaded data first
+                    onRefreshBtnClick();
+
                     mAddBtn.setImageResource(R.drawable.ic_cancel_add_snag);
                     mAddSizzleAlertBtn.setVisibility(View.VISIBLE);
                 } else {
@@ -342,7 +351,6 @@ public class MapsActivity extends AppCompatActivity implements
 
             }
         });
-
 
 
         // Construct a GeoDataClient.
@@ -393,6 +401,7 @@ public class MapsActivity extends AppCompatActivity implements
             // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
             // because this activity implements the LoaderCallbacks interface).
             loaderManager.initLoader(SIZZLE_LOADER_ID, null, this);
+
         } else {
             Log.e(LOG_TAG, "Error loading");
             Toast.makeText(this, getString(R.string.toast_check_internet), Toast.LENGTH_SHORT).show();
@@ -471,12 +480,20 @@ public class MapsActivity extends AppCompatActivity implements
         // startLocationUpdates();
         moveCameraToAustralia();
 
-        //if map doesn't have markers, add markers to map
+        /*//if map doesn't have markers, add markers to map
         if (this.markerOptions != null && !this.markerOptions.isEmpty()) {
             for (MarkerOptions markerOption : this.markerOptions) {
                 this.mMap.addMarker(markerOption);
             }
+        }*/
+        //if map doesn't have markers, add markers to map
+        if (this.markerOptions != null && !this.markerOptions.isEmpty()) {
+        for (int i = 0; i < markerOptions.size(); i++) {
+
+            this.mMap.addMarker(markerOptions.get(i)).setTag(mSizzles.get(i));
         }
+
+                }
     }
 
     @Override
@@ -505,6 +522,9 @@ public class MapsActivity extends AppCompatActivity implements
         // check if mMap is not null before invoking addMarker method to avoid "null object reference" error
         if (mMap != null) {
 
+            // clear all markers first
+            mMap.clear();
+
             for (Sizzle sizzle : sizzles) {
                 // build markers with sizzleIds tagged
                 mMap.addMarker(new MarkerOptions()
@@ -513,9 +533,6 @@ public class MapsActivity extends AppCompatActivity implements
                         .snippet(sizzle.getAddress())
                         .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))).setTag(sizzle);
 
-                // add all sizzles into mSizzles
-
-                mSizzles.add(sizzle);
             }
 
         } else {
@@ -553,8 +570,7 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     public void onRefreshBtnClick() {
-        // clear all markers so the app reload updated data and recreate all markers
-        mMap.clear();
+
 
         // Restart loader to reload updated data and recreate all markers
         getLoaderManager().restartLoader(0, null, this);
@@ -562,7 +578,56 @@ public class MapsActivity extends AppCompatActivity implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return false;
+
+        setUpViewsOnMarkerClick();
+
+        // Creating a new SizzleDetailFragment object
+        SizzleDetailFragment sizzleDetailFragment = new SizzleDetailFragment();
+        if(mSavedInstanceState == null) {
+
+            // Add the fragment to its container using a transaction
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, sizzleDetailFragment)
+                    .commit();
+        }
+
+        int sizzleId = 0;
+        String sizzleName = "";
+        String sizzleAddress = "";
+
+        Sizzle sizzle = (Sizzle)marker.getTag();
+        if (sizzle != null) {
+
+            // if users click a newly created marker then get the selected sizzle's sizzleId from SharedPreferences
+            if (marker.getTitle().equals(NEW_SIZZLE_TITLE_TAG)) {
+                SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
+                sizzleId = mSettings.getInt("sizzleId", 0);
+                sizzle.setSizzleId(sizzleId);
+                LogUtil.debug("trienSizzleId", String.valueOf(sizzleId));
+
+            }
+
+            // else, get sizzle Id from marker's tag
+            else {
+
+                sizzleId = sizzle.getSizzleId();
+
+                LogUtil.debug("trienSizzleId2", String.valueOf(sizzleId));
+
+            }
+
+            // attach sizzle Id, name, and address to bundle (retrieve them all from SizzleDetailFragment)
+            sizzleName = sizzle.getName();
+            sizzleAddress = sizzle.getAddress();
+
+            // send selected address to AddSizzleFragment
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_SELECTED_SIZZLE, sizzle);
+            sizzleDetailFragment.setArguments(bundle);
+
+        }
+
+        return true;
     }
 
 
@@ -597,7 +662,7 @@ public class MapsActivity extends AppCompatActivity implements
 
                 // Add the fragment to its container using a transaction
                 getFragmentManager().beginTransaction()
-                        .add(R.id.fragmentContainer, addSizzleFragment)
+                        .replace(R.id.fragmentContainer, addSizzleFragment)
                         .commit();
             }
 
@@ -643,9 +708,14 @@ public class MapsActivity extends AppCompatActivity implements
         mMyLocationBtn.setVisibility(View.GONE);
     }
 
+    private void setUpViewsOnMarkerClick() {
+
+        mRefreshBtn.setVisibility(View.GONE);
+        mMyLocationBtn.setVisibility(View.GONE);
+    }
+
     /**
-     * AddMarker method. If adding temporary one, create a marker with yello snag pin icon
-     * If a permanent one, pick the blue one
+     * addTempMarker method. as adding temporary one, create a marker with yello snag pin icon
      */
     private Marker addTempMarker(LatLng latLng) {
 
@@ -660,8 +730,7 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     /**
-     * AddMarker method. If adding temporary one, create a marker with yello snag pin icon
-     * If a permanent one, pick the blue one
+     * addPermanentMarker method. as adding permanent one, create a marker with blue snag pin icon
      */
     private Marker addPermanentMarker(Sizzle sizzle) {
 
@@ -669,7 +738,7 @@ public class MapsActivity extends AppCompatActivity implements
 
             newMarker  =  mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
-                    .title(sizzle.getName())
+                    .title(NEW_SIZZLE_TITLE_TAG)
                     .snippet(sizzle.getAddress())
                     .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin))));
 
@@ -711,17 +780,11 @@ public class MapsActivity extends AppCompatActivity implements
         }
     }
 
-/*    @Override
+    @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
-        if (mPermissionDenied) {
-            // Permission was not granted, display error dialog.
-            //showMissingPermissionError();
-            //this.recreate();
-            mPermissionDenied = false;
-        }
 
-    }*/
+    }
 
     @Override
     public void onResume() {
@@ -1087,8 +1150,8 @@ public class MapsActivity extends AppCompatActivity implements
      * Shows a {@link Snackbar}.
      *
      * @param mainTextStringId The id for the string resource for the Snackbar text.
-     * @param actionStringId   The text of the OnCloseBtnClickListener item.
-     * @param listener         The listener associated with the Snackbar OnCloseBtnClickListener.
+     * @param actionStringId   The text of the OnAddSizzleButtonsClickListener item.
+     * @param listener         The listener associated with the Snackbar OnAddSizzleButtonsClickListener.
      */
     private void showSnackbar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
@@ -1113,7 +1176,22 @@ public class MapsActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onCloseBtnClick() {
+    public void onSizzleDetailCloseBtnClick() {
+
+        // remove sizzleDetailFragment
+        SizzleDetailFragment sizzleDetailFragment = (SizzleDetailFragment) getFragmentManager()
+                .findFragmentById(R.id.fragmentContainer);
+        getFragmentManager().beginTransaction()
+                .remove(sizzleDetailFragment).commit();
+
+        // enable mRefreshBtn and mMyLocationBtn
+        mRefreshBtn.setVisibility(View.VISIBLE);
+        mMyLocationBtn.setVisibility(View.VISIBLE);
+
+    }
+
+    @Override
+    public void onAddSizzleCloseBtnClick() {
 
         // remove addSizzleFragment
         AddSizzleFragment addSizzleFragment = (AddSizzleFragment) getFragmentManager()
@@ -1135,12 +1213,11 @@ public class MapsActivity extends AppCompatActivity implements
     public void onSnagItBtnClick(Sizzle sizzle) {
 
         // remove fragment and adjust views accordingly
-        onCloseBtnClick();
+        onAddSizzleCloseBtnClick();
 
         // create a new permanent marker on the selected location
-        addPermanentMarker(sizzle);
+       // addPermanentMarker(sizzle);
 
-        onRefreshBtnClick();
     }
 
 }

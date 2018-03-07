@@ -128,9 +128,7 @@ public class DataUtil {
     /**
      * Create sizzle
      */
-    public static int createNewSizzle(WeakReference<Context> mWeakContext, int userId, Sizzle newSizzle, Bitmap bitmap) {
-
-        int sizzleId = 0;
+    public static void createNewSizzle(WeakReference<Context> mWeakContext, int userId, Sizzle newSizzle, Bitmap bitmap) {
 
         String url = SIZZLE_BASE_URL + CREATE_SIZZLE_URL_TAG;
 
@@ -157,16 +155,15 @@ public class DataUtil {
             client.addFilePart("photo", "unnamed-file.png", baos.toByteArray());
             client.finishMultipart();
 
-            // parse response and get the new sizzle Id
+            // parse response to get the new sizzle Id, then save it to SharePref
             String response = client.getResponse();
-            sizzleId = parseSizzleCreationResponse(mWeakContext, response);
-
+            int sizzleId = parseSizzleCreationResponse(mWeakContext, response);
+            saveSizzleAsPreference(mWeakContext, sizzleId);
             Log.d("triennewSIzzle", sizzleId + response);
+
         } catch (Throwable t) {
             t.printStackTrace();
         }
-
-        return sizzleId;
     }
 
     /**
@@ -290,7 +287,7 @@ public class DataUtil {
      */
     public static int parseSizzleCreationResponse(WeakReference<Context> context, String response) {
 
-        if (response.contains("sizzle_id")) {
+     /*   if (response.contains("sizzle_id")) {
             // After sending post method to create new user, the http response format will be: {"user_id":1076}
             // We extract sizzle Id here
             String text1 = response.split("}")[0];
@@ -299,6 +296,17 @@ public class DataUtil {
         } else {
             // call mWeakContext.get() to get main context
             Toast.makeText(context.get(), "Error creating new sizzle", Toast.LENGTH_SHORT).show();
+            return 0;
+        }*/
+        if (response.contains("sizzle_id")) {
+            // After sending post method to create new user, the http response format will be: {"user_id":1076}
+            // We extract userId here
+            String text = response.split(":")[1];
+            int indexOfCurlyBracket = text.indexOf("}");
+
+            return Integer.parseInt(text.substring(0, indexOfCurlyBracket));
+        } else {
+            Toast.makeText(context.get(), "Error creating username", Toast.LENGTH_SHORT).show();
             return 0;
         }
 
@@ -314,6 +322,19 @@ public class DataUtil {
 
         editor.putString("username", username);
         editor.putInt("userId", userId);
+        editor.apply(); // apply is async
+        // editor.commit(); // commit is synchronous
+    }
+
+    /**
+     * save username and userId in SharedPreferences
+     */
+    private static void saveSizzleAsPreference(WeakReference<Context> context, int sizzleId) {
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context.get());
+        SharedPreferences.Editor editor = mSettings.edit();
+
+        editor.putInt("sizzleId", sizzleId);
         editor.apply(); // apply is async
         // editor.commit(); // commit is synchronous
     }

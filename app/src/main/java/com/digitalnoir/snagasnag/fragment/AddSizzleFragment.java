@@ -28,6 +28,8 @@ import com.digitalnoir.snagasnag.utility.LogUtil;
 import com.digitalnoir.snagasnag.utility.SizzleCreater;
 import com.google.android.gms.maps.model.LatLng;
 
+import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_ADDRESS;
+import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_LAT_LNG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.ImagePickerUtil.getPickImageIntent;
 import static com.digitalnoir.snagasnag.utility.TextValidation.validateEmptyText;
@@ -39,14 +41,12 @@ import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithP
 
 public class AddSizzleFragment extends Fragment {
 
-    public static final String EXTRA_SELECTED_ADDRESS = "selected_address";
-    public static final String EXTRA_SELECTED_LAT_LNG = "selected_lat_lng";
     public static final int PERMISSION_REQUEST_CODE = 1;
 
     // PICK_IMAGE_ID for selecting image intent. The number doesn't matter
     private static final int PICK_IMAGE_ID = 234;
 
-    private OnCloseBtnClickListener mCallback;
+    private OnAddSizzleButtonsClickListener mCallback;
 
 
     private EditText sizzleNameEditText;
@@ -67,12 +67,12 @@ public class AddSizzleFragment extends Fragment {
     }
 
     /**
-     * The inner type interface {@link OnCloseBtnClickListener} let the activity, which must implement
+     * The inner type interface {@link OnAddSizzleButtonsClickListener} let the activity, which must implement
      * it, control the communication between fragments. In its onAttach() method it can check if the
      * activity correctly implements this interface.
      */
-    public interface OnCloseBtnClickListener {
-        void onCloseBtnClick();
+    public interface OnAddSizzleButtonsClickListener {
+        void onAddSizzleCloseBtnClick();
 
         void onSnagItBtnClick(Sizzle sizzle);
     }
@@ -80,11 +80,11 @@ public class AddSizzleFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnCloseBtnClickListener) {
-            mCallback = (OnCloseBtnClickListener) context;
+        if (context instanceof OnAddSizzleButtonsClickListener) {
+            mCallback = (OnAddSizzleButtonsClickListener) context;
         } else {
             throw new ClassCastException(context.toString()
-                    + " must implement AddSizzleFragment.OnCloseBtnClickListener");
+                    + " must implement AddSizzleFragment.OnAddSizzleButtonsClickListener");
         }
     }
 
@@ -98,7 +98,7 @@ public class AddSizzleFragment extends Fragment {
         addressEditText = (EditText) view.findViewById(R.id.addressEditText);
         detailEditText = (EditText) view.findViewById(R.id.descEditText);
 
-        snagItBottom = (Button) view.findViewById(R.id.snagItBottom);
+        snagItBottom = (Button) view.findViewById(R.id.rateBtn);
         closeBtn = (ImageButton) view.findViewById(R.id.closeBtn);
 
         addPhotoSmallBtn = (ImageButton) view.findViewById(R.id.addPicSmallBtn);
@@ -133,7 +133,7 @@ public class AddSizzleFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                mCallback.onCloseBtnClick();
+                mCallback.onAddSizzleCloseBtnClick();
             }
         });
 
@@ -180,7 +180,6 @@ public class AddSizzleFragment extends Fragment {
 
                 // close fragment and reload markers/data
                 mCallback.onSnagItBtnClick(newSizzle);
-                LogUtil.debug("trienzzz", String.valueOf(t.aaa));
             }
 
             else {
