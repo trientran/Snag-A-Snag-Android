@@ -179,22 +179,21 @@ public class DataUtil {
      */
     public static void createNewComment(WeakReference<Context> mWeakContext, int userId, int sizzleId, String commentString) {
 
-        String url = SIZZLE_BASE_URL + CREATE_USER_URL_TAG;
+        String url = SIZZLE_BASE_URL + CREATE_COMMENT_URL_TAG;
 
         try {
             HttpClientUpStream client = new HttpClientUpStream(url);
             client.connectForMultipart();
             client.addFormPart("unique_key", UNIQUE_KEY);
-            client.addFormPart("username", "");
+            client.addFormPart("user_id", String.valueOf(userId));
+            client.addFormPart("sizzle_id", String.valueOf(sizzleId));
+            client.addFormPart("comment", commentString);
             client.finishMultipart();
 
-            // parse response to get the new sizzle Id, then save it to SharePref
             String response = client.getResponse();
-
-            //int userId = parseUserCreationResponse(mWeakContext.get(), response);
-            saveUserAsPreference(mWeakContext.get(), "", userId);
+            // save Comment As Preference to trigger MapsActivity refreshing data
+            saveCommentAsPreference(mWeakContext, commentString);
             LogUtil.debug(LOG_TAG, response);
-            LogUtil.debug(LOG_TAG, String.valueOf(userId));
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -266,19 +265,21 @@ public class DataUtil {
                 JSONObject ratingObject = currentSizzle.getJSONObject("rating");
 
                 // Extract the value for the key called "sausage"
-                int sausage = ratingObject.getInt("sausage");
+                String sausage = ratingObject.get("sausage").toString();
 
                 // Extract the value for the key called "bread"
-                int bread = ratingObject.getInt("bread");
+                String bread = ratingObject.get("bread").toString();
 
                 // Extract the value for the key called "onion"
-                int onion = ratingObject.getInt("onion");
+                String onion = ratingObject.get("onion").toString();
 
                 // Extract the value for the key called "sauce"
-                int sauce = ratingObject.getInt("sauce");
+                String sauce = ratingObject.get("sauce").toString();
 
                 // Extract the value for the key called "aggregate_rating"
-                int aggregateRating = ratingObject.getInt("aggregate_rating");
+                String aggregateRating = ratingObject.get("aggregate_rating").toString();
+
+                LogUtil.debug("trien", String.valueOf(sausage));
 
                 // Create a Rating object
                 Rating rating = new Rating(sausage, bread, onion, sauce, aggregateRating);
@@ -293,7 +294,7 @@ public class DataUtil {
                 // For each comment in the commentArray, create an {@link Comment} object
                 for (int a = 0; a < commentArray.length(); a++) {
 
-                    JSONObject commentObject = commentArray.getJSONObject(i);
+                    JSONObject commentObject = commentArray.getJSONObject(a);
 
                     // Extract the value for the key called "username"
                     String username = commentObject.getString("username");
@@ -384,7 +385,7 @@ public class DataUtil {
     }
 
     /**
-     * save username and userId in SharedPreferences
+     * save sizzle in SharedPreferences
      */
     private static void saveSizzleAsPreference(WeakReference<Context> context, int sizzleId) {
 
@@ -392,6 +393,19 @@ public class DataUtil {
         SharedPreferences.Editor editor = mSettings.edit();
 
         editor.putInt("sizzleId", sizzleId);
+        editor.apply(); // apply is async
+        // editor.commit(); // commit is synchronous
+    }
+
+    /**
+     * save comment in SharedPreferences
+     */
+    private static void saveCommentAsPreference(WeakReference<Context> context, String newComment) {
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context.get());
+        SharedPreferences.Editor editor = mSettings.edit();
+
+        editor.putString("comment", newComment);
         editor.apply(); // apply is async
         // editor.commit(); // commit is synchronous
     }

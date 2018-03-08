@@ -30,9 +30,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.fragment.AddSizzleFragment;
@@ -70,6 +72,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,6 +80,7 @@ import java.util.Locale;
 
 import static com.digitalnoir.snagasnag.utility.DataUtil.DISPLAY_SIZZLE_URL_TAG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.SIZZLE_BASE_URL;
+import static com.digitalnoir.snagasnag.utility.TextValidation.formatCommentDateTime;
 
 public class MapsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<List<Sizzle>>,
@@ -337,7 +341,11 @@ public class MapsActivity extends AppCompatActivity implements
         mAddBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                try {
+                    formatCommentDateTime("2018-03-08 01:39:20");
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 if (mAddSizzleAlertBtn.getVisibility() == View.GONE) {
                     // refresh the map and loaded data first
                     onRefreshBtnClick();
@@ -712,6 +720,9 @@ public class MapsActivity extends AppCompatActivity implements
 
         mRefreshBtn.setVisibility(View.GONE);
         mMyLocationBtn.setVisibility(View.GONE);
+
+        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
+        marginParams.setMargins(0, 150, 0, 0);
     }
 
     /**

@@ -14,19 +14,25 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.adapter.CommentAdapter;
 import com.digitalnoir.snagasnag.model.Comment;
 import com.digitalnoir.snagasnag.model.Rating;
 import com.digitalnoir.snagasnag.model.Sizzle;
+import com.digitalnoir.snagasnag.utility.CommentCreator;
 import com.digitalnoir.snagasnag.utility.LogUtil;
-import com.digitalnoir.snagasnag.utility.SizzleCreator;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
+import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_SIZZLE;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.TextValidation.validateEmptyText;
@@ -40,6 +46,7 @@ public class SizzleDetailFragment extends Fragment {
 
     private OnSizzleDetailButtonsClickListener mCallback;
 
+    private ImageView snagAvatar;
     private TextView sizzleTitle;
     private ImageButton closeBtn;
     private TextView addressTv;
@@ -99,6 +106,7 @@ public class SizzleDetailFragment extends Fragment {
 
         commentList = new ArrayList<>();
 
+        snagAvatar = (ImageView)  view.findViewById(R.id.snagAvatar);
         sizzleTitle = (TextView) view.findViewById(R.id.sizzleTitle);
         closeBtn = (ImageButton) view.findViewById(R.id.closeBtn);
         addressTv = (TextView) view.findViewById(R.id.addressTv);
@@ -123,7 +131,7 @@ public class SizzleDetailFragment extends Fragment {
          * right-to-left layout.
          */
         LinearLayoutManager layoutManager =
-                new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+                new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, true);
 
         /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
         mRecyclerView.setLayoutManager(layoutManager);
@@ -149,36 +157,9 @@ public class SizzleDetailFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                // retrieve userId from SharedPreferences
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                int userId = prefs.getInt("userId", 0);
-
-                // validate new comment string with common pattern first
-                String newCommentString = validateTextWithPattern(getActivity(), commentEditText, getActivity().getString(R.string.comment_field_name));
-
-                if (isInternetConnected(getActivity()) && newCommentString != null) {
-
-                    // If there is a network connection and text validation is ok then send a request to create comment
-
-                    Comment newComment = new Comment(userId, sizzleId, newCommentString);
-
-                    // if userId exist, then go straight to creating a new comment
-                    if (userId != 0) {
-                        // item.setActionView(R.layout.progress);
-                        SizzleCreator t = new SizzleCreator(getActivity(), userId, newComment, bitmap);
-                        t.execute();
-
-                        // close fragment and reload markers/data
-                        mCallback.onSnagItBtnClick(newComment);
-                    }
-
-                    else {
-                        LogUtil.debug("triensharedUId", String.valueOf(userId));
-                    }
-                }
+                addNewComment();
 
 
-                commentAdapter.onChildAdded();
 
             }
         });
@@ -202,6 +183,39 @@ public class SizzleDetailFragment extends Fragment {
         return view;
     }
 
+    private void addNewComment() {
+        // retrieve userId from SharedPreferences
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int userId = prefs.getInt("userId", 0);
+
+        // validate new comment string with common pattern first
+        String newCommentString = validateTextWithPattern(getActivity(), commentEditText, getActivity().getString(R.string.comment_field_name));
+
+        // If there is a network connection and text validation is ok then send a request to create comment
+        if (isInternetConnected(getActivity()) && newCommentString != null) {
+
+            Comment newComment = new Comment(userId, sizzleId, newCommentString);
+
+            // if userId exist, then go straight to creating a new comment
+            if (userId != 0) {
+
+                // send a request to web service
+                CommentCreator commentCreator = new CommentCreator(getActivity(), userId, sizzleId, newCommentString);
+                commentCreator.execute();
+
+                // add the new comment to Recycler view
+                commentAdapter.onChildAdded(newComment, mRecyclerView);
+            }
+
+            else {
+                LogUtil.debug("triensharedUId", String.valueOf(userId));
+            }
+        }
+
+        // clear commentEditText field
+        commentEditText.getText().clear();
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -216,6 +230,13 @@ public class SizzleDetailFragment extends Fragment {
             LogUtil.debug("trienSizzleIdFragment", String.valueOf(sizzle.getSizzleId()));
 
             // get and set address for addressEditText
+            if (sizzle.getPhotoUrl() != null) {
+
+                Glide.with(this).load(sizzle.getPhotoUrl())
+                        .apply(bitmapTransform(new RoundedCornersTransformation(128, 0, RoundedCornersTransformation.CornerType.BOTTOM)))
+                        .into(snagAvatar);
+            }
+
             sizzleTitle.setText(sizzle.getName());
             addressTv.setText(sizzle.getAddress());
 
@@ -230,6 +251,8 @@ public class SizzleDetailFragment extends Fragment {
             // get and populate comments
             commentList = sizzle.getComments();
             commentAdapter.swapCommentData(commentList);
+
+            LogUtil.debug("triencom", commentList.toString());
 
         }
     }

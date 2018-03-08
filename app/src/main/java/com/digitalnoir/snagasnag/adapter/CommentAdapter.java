@@ -114,11 +114,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
         notifyDataSetChanged();
     }
 
-    public void onChildAdded(Comment newComment) {
+    public void onChildAdded(Comment newComment, RecyclerView recyclerView) {
 
-        // add new comment and notify the recycler view
+        // add new comment and notify the recycler view to insert the new item to last position
         mComments.add(newComment);
         notifyItemInserted(mComments.size() - 1);
+
+        // make recycler view scroll to the last created comment
+        recyclerView.smoothScrollToPosition(0);
     }
 
     /**
@@ -140,4 +143,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
             commentTv = (TextView) itemView.findViewById(R.id.commentTv);
         }
     }
+
+
 }

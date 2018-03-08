@@ -24,8 +24,8 @@ public class CommentCreator extends AsyncTask<String, Void, String> {
     private String commentString;
 
 
-    public CommentCreator(WeakReference<Context> mWeakContext, int mUserId, int mSizzleId, String commentString) {
-        this.mWeakContext = mWeakContext;
+    public CommentCreator(Context context, int mUserId, int mSizzleId, String commentString) {
+        mWeakContext = new WeakReference<>(context);
         this.mUserId = mUserId;
         this.mSizzleId = mSizzleId;
         this.commentString = commentString;

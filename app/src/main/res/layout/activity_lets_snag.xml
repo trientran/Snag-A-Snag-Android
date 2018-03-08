@@ -27,7 +27,6 @@
         android:layout_height="wrap_content"
         android:text="@string/snag_a_snag"
         android:textColor="@color/black"
-        android:fontFamily=""
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/letsSnagBtn"

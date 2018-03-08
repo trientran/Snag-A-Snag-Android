@@ -166,17 +166,16 @@ public class AddSizzleFragment extends Fragment {
 
         String desc = validateTextWithPattern(getActivity(), detailEditText, getActivity().getString(R.string.sizzle_desc_field_name));
 
+        // If there is a network connection and text validation is ok then send a request to create sizzle
         if (isInternetConnected(getActivity()) && sizzleName != null && address != null && desc != null) {
-
-            // If there is a network connection and text validation is ok then send a request to create sizzle
 
             Sizzle newSizzle = new Sizzle(String.valueOf(lat), String.valueOf(lng), sizzleName, address, desc);
 
             // if userId exist, then go straight to creating a new sizzle
             if (userId != 0) {
-                // item.setActionView(R.layout.progress);
-                SizzleCreator t = new SizzleCreator(getActivity(), userId, newSizzle, bitmap);
-                t.execute();
+
+                SizzleCreator sizzleCreator = new SizzleCreator(getActivity(), userId, newSizzle, bitmap);
+                sizzleCreator.execute();
 
                 // close fragment and reload markers/data
                 mCallback.onSnagItBtnClick(newSizzle);

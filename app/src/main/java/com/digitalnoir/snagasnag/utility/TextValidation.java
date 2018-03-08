@@ -2,11 +2,16 @@ package com.digitalnoir.snagasnag.utility;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -70,4 +75,18 @@ public class TextValidation {
 
         return text;
     }
+
+    public static String formatCommentDateTime(String datetime) throws ParseException {
+
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = fmt.parse(datetime);
+LogUtil.debug("troe", String.valueOf(date));
+        SimpleDateFormat fmtOut = new SimpleDateFormat("h:mm a dd MMM", Locale.ENGLISH);
+        //return fmtOut.format(date);
+        System.out.println(fmtOut.format(date));
+        LogUtil.debug("troe", fmtOut.format(date));
+        return "";
+    }
+
+
 }

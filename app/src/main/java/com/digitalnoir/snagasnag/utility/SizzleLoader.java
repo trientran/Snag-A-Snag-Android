@@ -43,6 +43,7 @@ public class SizzleLoader extends AsyncTaskLoader<List<Sizzle>> {
             deliverResult(mSizzles);
         }
 
+        // whenever SharedPreferences change, Loader will be triggered to reload data
         if (sharedPreferenceChangeListener == null) {
             final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 

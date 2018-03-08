@@ -11,14 +11,14 @@ public class Rating implements Parcelable{
 
     private int userId;
     private int sizzleId;
-    private double sausage;
-    private double bread;
-    private double onion;
-    private double sauce;
-    private double aggregateRating;
+    private String sausage;
+    private String bread;
+    private String onion;
+    private String sauce;
+    private String aggregateRating;
 
 
-    public Rating(double sausage, double bread, double onion, double sauce, double aggregateRating) {
+    public Rating(String sausage, String bread, String onion, String sauce, String aggregateRating) {
         this.sausage = sausage;
         this.bread = bread;
         this.onion = onion;
@@ -26,13 +26,14 @@ public class Rating implements Parcelable{
         this.aggregateRating = aggregateRating;
     }
 
-    public Rating(int userId, int sizzleId, double sausage, double bread, double onion, double sauce) {
+    public Rating(int userId, int sizzleId, String sausage, String bread, String onion, String sauce, String aggregateRating) {
         this.userId = userId;
         this.sizzleId = sizzleId;
         this.sausage = sausage;
         this.bread = bread;
         this.onion = onion;
         this.sauce = sauce;
+        this.aggregateRating = aggregateRating;
     }
 
     /**
@@ -42,11 +43,11 @@ public class Rating implements Parcelable{
      */
     public Rating(Parcel in) {
 
-        this.sausage = in.readDouble();
-        this.bread = in.readDouble();
-        this.onion =in.readDouble();
-        this.sauce = in.readDouble();
-        this.aggregateRating = in.readDouble();
+        this.sausage = in.readString();
+        this.bread = in.readString();
+        this.onion =in.readString();
+        this.sauce = in.readString();
+        this.aggregateRating = in.readString();
     }
 
     public int getUserId() {
@@ -65,43 +66,43 @@ public class Rating implements Parcelable{
         this.sizzleId = sizzleId;
     }
 
-    public double getSausage() {
+    public String getSausage() {
         return sausage;
     }
 
-    public void setSausage(double sausage) {
+    public void setSausage(String sausage) {
         this.sausage = sausage;
     }
 
-    public double getBread() {
+    public String getBread() {
         return bread;
     }
 
-    public void setBread(double bread) {
+    public void setBread(String bread) {
         this.bread = bread;
     }
 
-    public double getOnion() {
+    public String getOnion() {
         return onion;
     }
 
-    public void setOnion(double onion) {
+    public void setOnion(String onion) {
         this.onion = onion;
     }
 
-    public double getSauce() {
+    public String getSauce() {
         return sauce;
     }
 
-    public void setSauce(double sauce) {
+    public void setSauce(String sauce) {
         this.sauce = sauce;
     }
 
-    public double getAggregateRating() {
+    public String getAggregateRating() {
         return aggregateRating;
     }
 
-    public void setAggregateRating(double aggregateRating) {
+    public void setAggregateRating(String aggregateRating) {
         this.aggregateRating = aggregateRating;
     }
 
@@ -112,11 +113,11 @@ public class Rating implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int i) {
-        dest.writeDouble(sausage);
-        dest.writeDouble(bread);
-        dest.writeDouble(onion);
-        dest.writeDouble(sauce);
-        dest.writeDouble(aggregateRating);
+        dest.writeString(sausage);
+        dest.writeString(bread);
+        dest.writeString(onion);
+        dest.writeString(sauce);
+        dest.writeString(aggregateRating);
     }
 
     /**
