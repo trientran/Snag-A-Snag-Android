@@ -27,6 +27,8 @@ import com.digitalnoir.snagasnag.utility.CommentCreator;
 import com.digitalnoir.snagasnag.utility.LogUtil;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -85,6 +87,7 @@ public class SizzleDetailFragment extends Fragment {
 
         void onSizzleDetailCloseBtnClick();
 
+        void onRateBtnClick();
     }
 
     @Override
@@ -187,6 +190,7 @@ public class SizzleDetailFragment extends Fragment {
         // retrieve userId from SharedPreferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int userId = prefs.getInt("userId", 0);
+        String userName = prefs.getString("username", "missing");
 
         // validate new comment string with common pattern first
         String newCommentString = validateTextWithPattern(getActivity(), commentEditText, getActivity().getString(R.string.comment_field_name));
@@ -200,11 +204,18 @@ public class SizzleDetailFragment extends Fragment {
             if (userId != 0) {
 
                 // send a request to web service
-                CommentCreator commentCreator = new CommentCreator(getActivity(), userId, sizzleId, newCommentString);
+                CommentCreator commentCreator = new CommentCreator(getActivity(), newComment);
                 commentCreator.execute();
+                LogUtil.debug("triencomUId", String.valueOf(userId));
+                LogUtil.debug("triencomSizzleid", String.valueOf(sizzleId));
+                LogUtil.debug("triencomStr", String.valueOf(newCommentString));
 
                 // add the new comment to Recycler view
+                newComment.setUsername(userName);
+                Date currentTime = Calendar.getInstance().getTime();
+                newComment.setDate(currentTime.toString());
                 commentAdapter.onChildAdded(newComment, mRecyclerView);
+                LogUtil.debug("triencom", String.valueOf(currentTime));
             }
 
             else {
@@ -233,7 +244,7 @@ public class SizzleDetailFragment extends Fragment {
             if (sizzle.getPhotoUrl() != null) {
 
                 Glide.with(this).load(sizzle.getPhotoUrl())
-                        .apply(bitmapTransform(new RoundedCornersTransformation(128, 0, RoundedCornersTransformation.CornerType.BOTTOM)))
+                        .apply(bitmapTransform(new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL)))
                         .into(snagAvatar);
             }
 
@@ -251,6 +262,9 @@ public class SizzleDetailFragment extends Fragment {
             // get and populate comments
             commentList = sizzle.getComments();
             commentAdapter.swapCommentData(commentList);
+
+            // make recycler view scroll to the last created comment
+            mRecyclerView.smoothScrollToPosition(commentList.size()-1);
 
             LogUtil.debug("triencom", commentList.toString());
 

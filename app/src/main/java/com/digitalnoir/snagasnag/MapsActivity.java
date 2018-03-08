@@ -722,7 +722,7 @@ public class MapsActivity extends AppCompatActivity implements
         mMyLocationBtn.setVisibility(View.GONE);
 
         ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
-        marginParams.setMargins(0, 150, 0, 0);
+        marginParams.setMargins(0, 100, 0, 0);
     }
 
     /**
@@ -1199,6 +1199,15 @@ public class MapsActivity extends AppCompatActivity implements
         mRefreshBtn.setVisibility(View.VISIBLE);
         mMyLocationBtn.setVisibility(View.VISIBLE);
 
+        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
+        marginParams.setMargins(0, 450, 0, 0);
+
+    }
+
+    @Override
+    public void onRateBtnClick() {
+        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
+        marginParams.setMargins(0, 450, 0, 0);
     }
 
     @Override

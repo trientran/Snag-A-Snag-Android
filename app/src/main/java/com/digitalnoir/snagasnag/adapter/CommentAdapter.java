@@ -26,8 +26,11 @@ import android.widget.TextView;
 import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.model.Comment;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.digitalnoir.snagasnag.utility.TextValidation.formatCommentDateTime;
 
 /**
  * {@link CommentAdapter} showcases the comment list with a RecyclerView
@@ -59,8 +62,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
      *                  for more details.
      * @return A new CommentAdapterViewHolder that holds the View for each list item
      */
+    @NonNull
     @Override
-    public CommentAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public CommentAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
         View view = LayoutInflater.from(mContext).inflate(R.layout.comment_item, viewGroup, false);
 
@@ -80,10 +84,17 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
      * @param position                 The position of the item within the adapter's data set.
      */
     @Override
-    public void onBindViewHolder(CommentAdapterViewHolder commentAdapterViewHolder, int position) {
+    public void onBindViewHolder(@NonNull CommentAdapterViewHolder commentAdapterViewHolder, int position) {
 
         // fetch each comment and set text for each comment layout's  item
         Comment comment = mComments.get(position);
+
+
+        try {
+            formatCommentDateTime(comment.getDate());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         commentAdapterViewHolder.usernameTv.setText(comment.getUsername());
         commentAdapterViewHolder.timeLapseTv.setText(comment.getDate());
@@ -121,7 +132,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
         notifyItemInserted(mComments.size() - 1);
 
         // make recycler view scroll to the last created comment
-        recyclerView.smoothScrollToPosition(0);
+        recyclerView.smoothScrollToPosition(mComments.size());
     }
 
     /**

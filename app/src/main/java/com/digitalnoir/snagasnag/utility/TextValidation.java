@@ -80,12 +80,14 @@ public class TextValidation {
 
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = fmt.parse(datetime);
-LogUtil.debug("troe", String.valueOf(date));
+        LogUtil.debug("troe", String.valueOf(date));
+
         SimpleDateFormat fmtOut = new SimpleDateFormat("h:mm a dd MMM", Locale.ENGLISH);
         //return fmtOut.format(date);
-        System.out.println(fmtOut.format(date));
-        LogUtil.debug("troe", fmtOut.format(date));
-        return "";
+        String dateString = fmtOut.format(date);
+        LogUtil.debug("troe", dateString);
+
+        return dateString;
     }
 
 

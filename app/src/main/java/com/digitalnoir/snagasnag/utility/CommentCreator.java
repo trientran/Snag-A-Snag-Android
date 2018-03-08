@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
+import com.digitalnoir.snagasnag.model.Comment;
 import com.digitalnoir.snagasnag.model.Sizzle;
 
 import java.lang.ref.WeakReference;
@@ -19,22 +20,18 @@ public class CommentCreator extends AsyncTask<String, Void, String> {
 
     // use weak context to avoid leaking a context object
     private WeakReference<Context> mWeakContext;
-    private int mUserId;
-    private int mSizzleId;
-    private String commentString;
+    private Comment comment;
 
-
-    public CommentCreator(Context context, int mUserId, int mSizzleId, String commentString) {
+    // comment object needs to be created using these properties: userId, sizzleId and commentString;
+    public CommentCreator(Context context, Comment comment) {
         mWeakContext = new WeakReference<>(context);
-        this.mUserId = mUserId;
-        this.mSizzleId = mSizzleId;
-        this.commentString = commentString;
+        this.comment = comment;
     }
 
     @Override
     protected String doInBackground(String... params) {
 
-        createNewComment(mWeakContext, mUserId, mSizzleId, commentString);
+        createNewComment(mWeakContext, comment);
 
         return null;
     }

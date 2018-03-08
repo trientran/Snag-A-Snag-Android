@@ -175,9 +175,9 @@ public class DataUtil {
     }
 
     /**
-     * Create comment
+     * Create comment. Comment object needs to be created using these properties: userId, sizzleId and commentString;
      */
-    public static void createNewComment(WeakReference<Context> mWeakContext, int userId, int sizzleId, String commentString) {
+    public static void createNewComment(WeakReference<Context> mWeakContext, Comment comment) {
 
         String url = SIZZLE_BASE_URL + CREATE_COMMENT_URL_TAG;
 
@@ -185,14 +185,14 @@ public class DataUtil {
             HttpClientUpStream client = new HttpClientUpStream(url);
             client.connectForMultipart();
             client.addFormPart("unique_key", UNIQUE_KEY);
-            client.addFormPart("user_id", String.valueOf(userId));
-            client.addFormPart("sizzle_id", String.valueOf(sizzleId));
-            client.addFormPart("comment", commentString);
+            client.addFormPart("user_id", String.valueOf(comment.getUserId()));
+            client.addFormPart("sizzle_id", String.valueOf(comment.getSizzleId()));
+            client.addFormPart("comment", comment.getCommentString());
             client.finishMultipart();
 
             String response = client.getResponse();
             // save Comment As Preference to trigger MapsActivity refreshing data
-            saveCommentAsPreference(mWeakContext, commentString);
+            saveCommentAsPreference(mWeakContext, comment.getCommentString());
             LogUtil.debug(LOG_TAG, response);
 
         } catch (Throwable t) {
