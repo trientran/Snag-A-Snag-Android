@@ -25,6 +25,7 @@
     <string name="sizzle_address_field_name">Address</string>
     <string name="sizzle_desc_field_name">Description</string>
     <string name="username_field_name">Username</string>
+    <string name="comment_field_name">Comment</string>
 
 
     <!--    Let's nag   -->
@@ -110,7 +111,7 @@
     <string name="overall_score">Overall Score</string>
     <string name="comments">Comments</string>
     <string name="snag_score">Snag Score</string>
-    <string name="comment">Comment</string>
+    <string name="commentString">Comment</string>
 
 
     <!--    Rate   -->

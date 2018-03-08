@@ -3,35 +3,38 @@ package com.digitalnoir.snagasnag.utility;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+
 import com.digitalnoir.snagasnag.model.Sizzle;
+
 import java.lang.ref.WeakReference;
+
+import static com.digitalnoir.snagasnag.utility.DataUtil.createNewComment;
 import static com.digitalnoir.snagasnag.utility.DataUtil.createNewSizzle;
-import static com.digitalnoir.snagasnag.utility.DataUtil.parseSizzleCreationResponse;
 
 /**
  * Created by Troy on 3/5/2018.
  */
 
-public class SizzleCreater extends AsyncTask<String, Void, String> {
+public class CommentCreator extends AsyncTask<String, Void, String> {
 
     // use weak context to avoid leaking a context object
     private WeakReference<Context> mWeakContext;
     private int mUserId;
-    private Sizzle mNewSizzle;
-    private Bitmap mBitmap;
+    private int mSizzleId;
+    private String commentString;
 
 
-    public SizzleCreater(Context context, int userId, Sizzle newSizzle, Bitmap bitmap) {
-        mWeakContext = new WeakReference<>(context);
-        this.mUserId = userId;
-        this.mNewSizzle = newSizzle;
-        this.mBitmap = bitmap;
+    public CommentCreator(WeakReference<Context> mWeakContext, int mUserId, int mSizzleId, String commentString) {
+        this.mWeakContext = mWeakContext;
+        this.mUserId = mUserId;
+        this.mSizzleId = mSizzleId;
+        this.commentString = commentString;
     }
 
     @Override
     protected String doInBackground(String... params) {
 
-        createNewSizzle(mWeakContext, mUserId, mNewSizzle, mBitmap);
+        createNewComment(mWeakContext, mUserId, mSizzleId, commentString);
 
         return null;
     }

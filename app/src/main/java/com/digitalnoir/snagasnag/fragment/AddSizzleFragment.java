@@ -25,7 +25,7 @@ import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.model.Sizzle;
 import com.digitalnoir.snagasnag.utility.ImagePickerUtil;
 import com.digitalnoir.snagasnag.utility.LogUtil;
-import com.digitalnoir.snagasnag.utility.SizzleCreater;
+import com.digitalnoir.snagasnag.utility.SizzleCreator;
 import com.google.android.gms.maps.model.LatLng;
 
 import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_ADDRESS;
@@ -175,7 +175,7 @@ public class AddSizzleFragment extends Fragment {
             // if userId exist, then go straight to creating a new sizzle
             if (userId != 0) {
                 // item.setActionView(R.layout.progress);
-                SizzleCreater t = new SizzleCreater(getActivity(), userId, newSizzle, bitmap);
+                SizzleCreator t = new SizzleCreator(getActivity(), userId, newSizzle, bitmap);
                 t.execute();
 
                 // close fragment and reload markers/data

@@ -11,7 +11,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static com.digitalnoir.snagasnag.utility.DataUtil.createNewUser;
+import com.digitalnoir.snagasnag.utility.UserCreator;
+
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
 
@@ -70,7 +71,9 @@ public class TakeOathActivity extends AppCompatActivity {
             // If there is a network connection and text validation is ok then send a request to create username
             else {
 
-                createNewUser(this, username);
+                UserCreator t = new UserCreator(this, username);
+                t.execute();
+
                 Intent intent = new Intent(this, SwearActivity.class);
                 intent.putExtra(EXTRA_USER_NAME, username);
                 startActivity(intent);

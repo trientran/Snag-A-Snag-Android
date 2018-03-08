@@ -32,7 +32,6 @@ public class LetsSnagActivity extends AppCompatActivity {
     }
 
     private void onLetsSnagBtnClick() {
-
         // retrieve username or userId from SharedPreferences
         SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(this);
         String username = mSettings.getString("username", "missing");
@@ -55,6 +54,5 @@ public class LetsSnagActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), TakeOathActivity.class);
             startActivity(intent);
         }
-
     }
 }

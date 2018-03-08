@@ -3,8 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Snag-A-Snag-Android.iml" filepath="$PROJECT_DIR$/Snag-A-Snag-Android.iml" />
+      <module fileurl="file://C:\Users\Troy\Desktop\New folder\Snag-A-Snag-Android\Snag-A-Snag-Android.iml" filepath="C:\Users\Troy\Desktop\New folder\Snag-A-Snag-Android\Snag-A-Snag-Android.iml" />
       <module fileurl="file://C:\Users\MainAcc\Desktop\Snag-A-Snag-Android\SnagASnag.iml" filepath="C:\Users\MainAcc\Desktop\Snag-A-Snag-Android\SnagASnag.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\Troy\Desktop\New folder\Snag-A-Snag-Android\app\app.iml" filepath="C:\Users\Troy\Desktop\New folder\Snag-A-Snag-Android\app\app.iml" />
       <module fileurl="file://C:\Users\MainAcc\Desktop\Snag-A-Snag-Android\app\app.iml" filepath="C:\Users\MainAcc\Desktop\Snag-A-Snag-Android\app\app.iml" />
     </modules>
   </component>

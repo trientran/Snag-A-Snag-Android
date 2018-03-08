@@ -10,15 +10,8 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.digitalnoir.snagasnag.R;
+import com.digitalnoir.snagasnag.model.Comment;
 import com.digitalnoir.snagasnag.model.Rating;
 import com.digitalnoir.snagasnag.model.Sizzle;
 
@@ -29,17 +22,15 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.digitalnoir.snagasnag.utility.HttpClientDownStream.createUrl;
+import static com.digitalnoir.snagasnag.utility.HttpClientDownStream.makeHttpRequest;
 
 /**
  * Database utilities to CRUD JSON data
@@ -114,17 +105,6 @@ public class DataUtil {
         return sizzles;
     }
 
-    /**
-     * Create user
-     */
-    public static void createNewUser(Context context, String username) {
-
-        Map<String, String> params = new HashMap <String, String>();
-        params.put("unique_key", UNIQUE_KEY);
-        params.put("username", username);
-
-        sendPostRequest(context, CREATE_USER_URL_TAG, username, params);
-    }
 
     /**
      * Create sizzle
@@ -138,13 +118,12 @@ public class DataUtil {
         if (bitmap == null) {
             // call mWeakContext.get() to get main context
             bitmap = BitmapFactory.decodeResource(mWeakContext.get().getResources(), R.drawable.ic_default_sizzle);
-        }
-        else {
+        } else {
             bitmap.compress(Bitmap.CompressFormat.PNG, 0, baos);
         }
 
         try {
-            HttpClient client = new HttpClient(url);
+            HttpClientUpStream client = new HttpClientUpStream(url);
             client.connectForMultipart();
             client.addFormPart("unique_key", UNIQUE_KEY);
             client.addFormPart("user_id", String.valueOf(userId));
@@ -168,16 +147,58 @@ public class DataUtil {
     }
 
     /**
+     * Create user
+     */
+    public static void createNewUser(WeakReference<Context> mWeakContext, String username) {
+
+        String url = SIZZLE_BASE_URL + CREATE_USER_URL_TAG;
+
+        try {
+            HttpClientUpStream client = new HttpClientUpStream(url);
+            client.connectForMultipart();
+            client.addFormPart("unique_key", UNIQUE_KEY);
+            client.addFormPart("username", username);
+            client.finishMultipart();
+
+            // parse response to get the new sizzle Id, then save it to SharePref
+            String response = client.getResponse();
+
+            int userId = parseUserCreationResponse(mWeakContext.get(), response);
+            saveUserAsPreference(mWeakContext.get(), username, userId);
+            LogUtil.debug(LOG_TAG, response);
+            LogUtil.debug(LOG_TAG, String.valueOf(userId));
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+
+    }
+
+    /**
      * Create comment
      */
-    public static void createNewComment(Context context, int userId, int sizzleId, String comment) {
-        Map<String, String> params = new HashMap <String, String>();
-        params.put("unique_key", UNIQUE_KEY);
-        params.put("user_id", String.valueOf(userId));
-        params.put("sizzle_id", String.valueOf(sizzleId));
-        params.put("comment", comment);
+    public static void createNewComment(WeakReference<Context> mWeakContext, int userId, int sizzleId, String commentString) {
 
-        sendPostRequest(context, CREATE_COMMENT_URL_TAG, null, params);
+        String url = SIZZLE_BASE_URL + CREATE_USER_URL_TAG;
+
+        try {
+            HttpClientUpStream client = new HttpClientUpStream(url);
+            client.connectForMultipart();
+            client.addFormPart("unique_key", UNIQUE_KEY);
+            client.addFormPart("username", "");
+            client.finishMultipart();
+
+            // parse response to get the new sizzle Id, then save it to SharePref
+            String response = client.getResponse();
+
+            //int userId = parseUserCreationResponse(mWeakContext.get(), response);
+            saveUserAsPreference(mWeakContext.get(), "", userId);
+            LogUtil.debug(LOG_TAG, response);
+            LogUtil.debug(LOG_TAG, String.valueOf(userId));
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     /**
@@ -185,234 +206,7 @@ public class DataUtil {
      */
     public static void createNewRating(Context context, int userId, int sizzleId, String sausage,
                                        String bread, String onion, String sauce) {
-        Map<String, String> params = new HashMap <String, String>();
-        params.put("unique_key", UNIQUE_KEY);
-        params.put("user_id", String.valueOf(userId));
-        params.put("sizzle_id", String.valueOf(sizzleId));
-        params.put("sausage", sausage);
-        params.put("bread", bread);
-        params.put("onion", onion);
-        params.put("sauce", sauce);
 
-        sendPostRequest(context, CREATE_RATING_URL_TAG, null, params);
-    }
-
-    /**
-     * Universal method to send a post request to web server
-     */
-    public static void sendPostRequest(final Context context,
-                                       final String appendedURL,
-                                       final String username,
-                                       final Map<String, String> params
-                                       ) {
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-
-        StringRequest jsonObjRequest = new StringRequest(Request.Method.POST, SIZZLE_BASE_URL + appendedURL
-
-                , new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                LogUtil.debug(LOG_TAG, response);
-
-                // handle response properly according to type of post request
-                switch (appendedURL) {
-                    case CREATE_USER_URL_TAG:
-
-                        int userId = parseUserCreationResponse(context, response);
-                        saveUserAsPreference(context, username, userId);
-                        LogUtil.debug(LOG_TAG, String.valueOf(userId));
-
-                        break;
-                    case CREATE_SIZZLE_URL_TAG:
-
-                        break;
-                    case CREATE_COMMENT_URL_TAG:
-
-                        break;
-                    case CREATE_RATING_URL_TAG:
-
-                        break;
-                }
-            }
-        }
-
-                , new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-                LogUtil.debug("volley", "Error: " + error.getMessage());
-                error.printStackTrace();
-
-            }
-        })
-
-        {
-
-            @Override
-            public String getBodyContentType() {
-                return "application/x-www-form-urlencoded; charset=UTF-8";
-            }
-
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-
-                return params;
-            }
-        };
-
-        queue.add(jsonObjRequest);
-    }
-
-    /**
-     * handle User Creation Response
-     */
-    private static int parseUserCreationResponse(Context context, String response) {
-
-        if (response.contains("user_id")) {
-            // After sending post method to create new user, the http response format will be: {"user_id":1076}
-            // We extract userId here
-            String text = response.split(":")[1];
-            return Integer.parseInt(text.substring(0, text.length() - 1));
-        } else {
-            Toast.makeText(context, "Error creating username", Toast.LENGTH_SHORT).show();
-            return 0;
-        }
-
-    }
-
-    /**
-     * handle User Creation Response
-     */
-    public static int parseSizzleCreationResponse(WeakReference<Context> context, String response) {
-
-     /*   if (response.contains("sizzle_id")) {
-            // After sending post method to create new user, the http response format will be: {"user_id":1076}
-            // We extract sizzle Id here
-            String text1 = response.split("}")[0];
-            String text2 = text1.split(":")[1];
-            return Integer.parseInt(text2);
-        } else {
-            // call mWeakContext.get() to get main context
-            Toast.makeText(context.get(), "Error creating new sizzle", Toast.LENGTH_SHORT).show();
-            return 0;
-        }*/
-        if (response.contains("sizzle_id")) {
-            // After sending post method to create new user, the http response format will be: {"user_id":1076}
-            // We extract userId here
-            String text = response.split(":")[1];
-            int indexOfCurlyBracket = text.indexOf("}");
-
-            return Integer.parseInt(text.substring(0, indexOfCurlyBracket));
-        } else {
-            Toast.makeText(context.get(), "Error creating username", Toast.LENGTH_SHORT).show();
-            return 0;
-        }
-
-    }
-
-    /**
-     * save username and userId in SharedPreferences
-     */
-    private static void saveUserAsPreference(Context context, String username, int userId) {
-
-        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = mSettings.edit();
-
-        editor.putString("username", username);
-        editor.putInt("userId", userId);
-        editor.apply(); // apply is async
-        // editor.commit(); // commit is synchronous
-    }
-
-    /**
-     * save username and userId in SharedPreferences
-     */
-    private static void saveSizzleAsPreference(WeakReference<Context> context, int sizzleId) {
-
-        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context.get());
-        SharedPreferences.Editor editor = mSettings.edit();
-
-        editor.putInt("sizzleId", sizzleId);
-        editor.apply(); // apply is async
-        // editor.commit(); // commit is synchronous
-    }
-
-    /**
-     * Returns new URL object from the given string URL.
-     */
-    private static URL createUrl(String stringUrl) {
-        URL url = null;
-        try {
-            url = new URL(stringUrl);
-        } catch (MalformedURLException e) {
-            Log.e(LOG_TAG, "Problem building the URL ", e);
-        }
-        return url;
-    }
-
-    /**
-     * Make an HTTP request to the given URL and return a String as the response.
-     */
-    private static String makeHttpRequest(URL url) throws IOException {
-        String jsonResponse = "";
-
-        // If the URL is null, then return early.
-        if (url == null) {
-            return jsonResponse;
-        }
-
-        HttpURLConnection urlConnection = null;
-        InputStream inputStream = null;
-        try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(10000 /* milliseconds */);
-            urlConnection.setConnectTimeout(15000 /* milliseconds */);
-            urlConnection.setRequestMethod("POST");
-            urlConnection.connect();
-
-            // If the request was successful (response code 200),
-            // then read the input stream and parse the response.
-            if (urlConnection.getResponseCode() == 200) {
-                inputStream = urlConnection.getInputStream();
-                jsonResponse = readFromStream(inputStream);
-            } else {
-                Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
-            }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Problem retrieving the Sizzle JSON results.", e);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (inputStream != null) {
-                // Closing the input stream could throw an IOException, which is why
-                // the makeHttpRequest(URL url) method signature specifies than an IOException
-                // could be thrown.
-                inputStream.close();
-            }
-        }
-        return jsonResponse;
-    }
-
-    /**
-     * Convert the {@link InputStream} into a String which contains the
-     * whole JSON response from the server.
-     */
-    private static String readFromStream(InputStream inputStream) throws IOException {
-        StringBuilder output = new StringBuilder();
-        if (inputStream != null) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
-            BufferedReader reader = new BufferedReader(inputStreamReader);
-            String line = reader.readLine();
-            while (line != null) {
-                output.append(line);
-                line = reader.readLine();
-            }
-        }
-        return output.toString();
     }
 
     /**
@@ -486,15 +280,17 @@ public class DataUtil {
                 // Extract the value for the key called "aggregate_rating"
                 int aggregateRating = ratingObject.getInt("aggregate_rating");
 
-                // now we can create a Rating object
-                Rating rating = new Rating(sausage, bread, onion, sauce);
+                // Create a Rating object
+                Rating rating = new Rating(sausage, bread, onion, sauce, aggregateRating);
 
                 /* *******************************************
                 Extract the value for the key called "comments" */
                 JSONArray commentArray = currentSizzle.getJSONArray("comments");
 
+                // create a Comment array
+                List<Comment> comments = new ArrayList<>();
 
-                // For each sizzle in the sizzleArray, create an {@link Sizzle} object
+                // For each comment in the commentArray, create an {@link Comment} object
                 for (int a = 0; a < commentArray.length(); a++) {
 
                     JSONObject commentObject = commentArray.getJSONObject(i);
@@ -506,13 +302,18 @@ public class DataUtil {
                     String date = commentObject.getString("date");
 
                     // Extract the value for the key called "sauce"
-                    String comment = commentObject.getString("comment");
+                    String commentString = commentObject.getString("comment");
 
+                    // Create a Comment object
+                    Comment comment = new Comment(username, date, commentString);
 
+                    // Add the new {@link Comment} to the list of comments.
+                    comments.add(comment);
                 }
+
                 // Create a new {@link Sizzle} object with the magnitude, location, time,
                 // and url from the JSON response.
-                Sizzle sizzle = new Sizzle(sizzleId, latitude, longitude, name, address, detail, photoUrl);
+                Sizzle sizzle = new Sizzle(sizzleId, latitude, longitude, name, address, detail, photoUrl, rating, comments);
 
                 // Add the new {@link Sizzle} to the list of sizzles.
                 sizzles.add(sizzle);
@@ -528,6 +329,71 @@ public class DataUtil {
 
         // Return the list of sizzles
         return sizzles;
+    }
+
+    /**
+     * handle User Creation Response
+     */
+    private static int parseUserCreationResponse(Context context, String response) {
+
+        if (response.contains("user_id")) {
+            // After sending post method to create new user, the http response format will be: {"user_id":1076}
+            // We extract userId here
+            String text = response.split(":")[1];
+            int indexOfCurlyBracket = text.indexOf("}");
+
+            return Integer.parseInt(text.substring(0, indexOfCurlyBracket));
+        } else {
+            Toast.makeText(context, "Error creating username", Toast.LENGTH_SHORT).show();
+            return 0;
+        }
+
+    }
+
+    /**
+     * handle User Creation Response
+     */
+    public static int parseSizzleCreationResponse(WeakReference<Context> context, String response) {
+
+        if (response.contains("sizzle_id")) {
+            // After sending post method to create new user, the http response format will be: {"user_id":1076}
+            // We extract userId here
+            String text = response.split(":")[1];
+            int indexOfCurlyBracket = text.indexOf("}");
+
+            return Integer.parseInt(text.substring(0, indexOfCurlyBracket));
+        } else {
+            Toast.makeText(context.get(), "Error creating sizzle", Toast.LENGTH_SHORT).show();
+            return 0;
+        }
+
+    }
+
+    /**
+     * save username and userId in SharedPreferences
+     */
+    private static void saveUserAsPreference(Context context, String username, int userId) {
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = mSettings.edit();
+
+        editor.putString("username", username);
+        editor.putInt("userId", userId);
+        editor.apply(); // apply is async
+        // editor.commit(); // commit is synchronous
+    }
+
+    /**
+     * save username and userId in SharedPreferences
+     */
+    private static void saveSizzleAsPreference(WeakReference<Context> context, int sizzleId) {
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context.get());
+        SharedPreferences.Editor editor = mSettings.edit();
+
+        editor.putInt("sizzleId", sizzleId);
+        editor.apply(); // apply is async
+        // editor.commit(); // commit is synchronous
     }
 
     /**

@@ -16,7 +16,6 @@
 package com.digitalnoir.snagasnag.adapter;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -83,11 +82,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
     @Override
     public void onBindViewHolder(CommentAdapterViewHolder commentAdapterViewHolder, int position) {
 
-        // todo get and bind data here
+        // fetch each comment and set text for each comment layout's  item
+        Comment comment = mComments.get(position);
 
-        commentAdapterViewHolder.usernameTv.setText("");
-        commentAdapterViewHolder.timeLapseTv.setText("");
-        commentAdapterViewHolder.commentTv.setText("");
+        commentAdapterViewHolder.usernameTv.setText(comment.getUsername());
+        commentAdapterViewHolder.timeLapseTv.setText(comment.getDate());
+        commentAdapterViewHolder.commentTv.setText(comment.getCommentString());
     }
 
     /**
@@ -102,21 +102,23 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
     }
 
     /**
-     * Swaps the cursor used by the CommentAdapter for its comment data. This method is called by
+     * Swaps the comment list used by the CommentAdapter for its comment data. This method is called by
      * MainActivity after a load has finished, as well as when the Loader responsible for loading
      * the comment data is reset. When this method is called, we assume we have a completely new
      * set of data, so we call notifyDataSetChanged to tell the RecyclerView to update.
      *
-     * @param newComments the new cursor to use as CommentAdapter's data source
+     * @param newComments the new comment list to use as CommentAdapter's data source
      */
-    void swapCursor(List<Comment> newComments) {
+    public void swapCommentData(List<Comment> newComments) {
         mComments = newComments;
         notifyDataSetChanged();
     }
 
-    public void onChildAdded() {
+    public void onChildAdded(Comment newComment) {
 
-        // todo
+        // add new comment and notify the recycler view
+        mComments.add(newComment);
+        notifyItemInserted(mComments.size() - 1);
     }
 
     /**

@@ -10,7 +10,7 @@ import java.net.URL;
  * Created by Troy on 3/2/2018.
  */
 
-public class HttpClient {
+public class HttpClientUpStream {
     private String url;
     private HttpURLConnection con;
     private OutputStream os;
@@ -18,7 +18,7 @@ public class HttpClient {
     private String delimiter = "--";
     private String boundary =  "SwA"+Long.toString(System.currentTimeMillis())+"SwA";
 
-    public HttpClient(String url) {
+    public HttpClientUpStream(String url) {
         this.url = url;
     }
 

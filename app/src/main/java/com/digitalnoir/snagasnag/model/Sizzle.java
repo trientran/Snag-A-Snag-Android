@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.List;
 
 /**
  * Created by Troy on 2/20/2018.
@@ -19,6 +20,8 @@ public class Sizzle implements Parcelable{
     private String address;
     private String detail;
     private String photoUrl;
+    private Rating rating;
+    private List<Comment> comments;
 
 
     public Sizzle(String latitude, String longitude, String name, String address, String detail) {
@@ -29,7 +32,7 @@ public class Sizzle implements Parcelable{
         this.detail = detail;
     }
 
-    public Sizzle(int sizzleId, String latitude, String longitude, String name, String address, String detail, String photoUrl) {
+    public Sizzle(int sizzleId, String latitude, String longitude, String name, String address, String detail, String photoUrl, Rating rating, List<Comment> comments) {
         this.sizzleId = sizzleId;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -37,10 +40,12 @@ public class Sizzle implements Parcelable{
         this.address = address;
         this.detail = detail;
         this.photoUrl = photoUrl;
+        this.rating = rating;
+        this.comments = comments;
     }
 
     /**
-     * Use when reconstructing User object from parcel
+     * Use when reconstructing Sizzle object from parcel
      * This will be used only by the 'CREATOR'
      * @param in a parcel to read this object
      */
@@ -111,6 +116,22 @@ public class Sizzle implements Parcelable{
         this.photoUrl = photoUrl;
     }
 
+    public Rating getRating() {
+        return rating;
+    }
+
+    public void setRating(Rating rating) {
+        this.rating = rating;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -125,6 +146,9 @@ public class Sizzle implements Parcelable{
         dest.writeString(address);
         dest.writeString(detail);
         dest.writeString(photoUrl);
+        dest.writeTypedList(comments);
+        dest.writeValue(rating);
+
     }
 
     /**
