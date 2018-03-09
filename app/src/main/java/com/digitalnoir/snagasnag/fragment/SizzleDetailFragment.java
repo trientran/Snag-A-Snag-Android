@@ -4,10 +4,13 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,18 +29,18 @@ import com.digitalnoir.snagasnag.model.Sizzle;
 import com.digitalnoir.snagasnag.utility.CommentCreator;
 import com.digitalnoir.snagasnag.utility.LogUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_SIZZLE;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
-import static com.digitalnoir.snagasnag.utility.TextValidation.validateEmptyText;
 import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
 
 /**
@@ -71,6 +74,7 @@ public class SizzleDetailFragment extends Fragment {
     private CommentAdapter commentAdapter;
     private RecyclerView mRecyclerView;
     private List<Comment> commentList;
+    LinearLayoutManager layoutManager;
 
     Rating rating;
 
@@ -112,7 +116,7 @@ public class SizzleDetailFragment extends Fragment {
         snagAvatar = (ImageView)  view.findViewById(R.id.snagAvatar);
         sizzleTitle = (TextView) view.findViewById(R.id.sizzleTitle);
         closeBtn = (ImageButton) view.findViewById(R.id.closeBtn);
-        addressTv = (TextView) view.findViewById(R.id.addressTv);
+        addressTv = (TextView) view.findViewById(R.id.ratingHintTv);
 
         sausageScoreTv = (TextView) view.findViewById(R.id.sausageScoreTv);
         breadScoreTv = (TextView) view.findViewById(R.id.breadScoreTv);
@@ -133,7 +137,7 @@ public class SizzleDetailFragment extends Fragment {
          * layout. Generally, this is only true with horizontal lists that need to support a
          * right-to-left layout.
          */
-        LinearLayoutManager layoutManager =
+        layoutManager =
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, true);
 
         /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
@@ -162,8 +166,6 @@ public class SizzleDetailFragment extends Fragment {
 
                 addNewComment();
 
-
-
             }
         });
 
@@ -183,6 +185,7 @@ public class SizzleDetailFragment extends Fragment {
             }
         });
 
+        mRecyclerView.setNestedScrollingEnabled(false);
         return view;
     }
 
@@ -206,16 +209,20 @@ public class SizzleDetailFragment extends Fragment {
                 // send a request to web service
                 CommentCreator commentCreator = new CommentCreator(getActivity(), newComment);
                 commentCreator.execute();
-                LogUtil.debug("triencomUId", String.valueOf(userId));
-                LogUtil.debug("triencomSizzleid", String.valueOf(sizzleId));
-                LogUtil.debug("triencomStr", String.valueOf(newCommentString));
 
                 // add the new comment to Recycler view
-                newComment.setUsername(userName);
+                SimpleDateFormat fmtOut = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 Date currentTime = Calendar.getInstance().getTime();
-                newComment.setDate(currentTime.toString());
+                String currentDatetimeString = fmtOut.format(currentTime);
+                newComment.setDate(currentDatetimeString);
+
+                newComment.setUsername(userName);
+
                 commentAdapter.onChildAdded(newComment, mRecyclerView);
-                LogUtil.debug("triencom", String.valueOf(currentTime));
+
+
+
+                LogUtil.debug("trienTime", currentDatetimeString);
             }
 
             else {
@@ -253,18 +260,22 @@ public class SizzleDetailFragment extends Fragment {
 
             // get and populate rating details
             rating = sizzle.getRating();
-            sausageScoreTv.setText(String.valueOf(rating.getSausage()));
-            breadScoreTv.setText(String.valueOf(rating.getBread()));
-            onionScoreTv.setText(String.valueOf(rating.getOnion()));
-            sauceScoreTv.setText(String.valueOf(rating.getSauce()));
-            totalScoreTv.setText(String.valueOf(rating.getAggregateRating()));
+
+            Spanned sausageScore = formatText(getResources(),String.valueOf(rating.getSausage()));
+            Spanned breadScore = formatText(getResources(),String.valueOf(rating.getBread()));
+            Spanned onionScore = formatText(getResources(),String.valueOf(rating.getOnion()));
+            Spanned sauceScore = formatText(getResources(),String.valueOf(rating.getSauce()));
+            Spanned totalScore = formatText(getResources(),String.valueOf(rating.getAggregateRating()));
+
+            sausageScoreTv.setText(sausageScore);
+            breadScoreTv.setText(breadScore);
+            onionScoreTv.setText(onionScore);
+            sauceScoreTv.setText(sauceScore);
+            totalScoreTv.setText(totalScore);
 
             // get and populate comments
             commentList = sizzle.getComments();
             commentAdapter.swapCommentData(commentList);
-
-            // make recycler view scroll to the last created comment
-            mRecyclerView.smoothScrollToPosition(commentList.size()-1);
 
             LogUtil.debug("triencom", commentList.toString());
 
@@ -278,6 +289,12 @@ public class SizzleDetailFragment extends Fragment {
 
     }
 
+    /**
+     * Helper method to format text nicely.
+     */
+    private static Spanned formatText(Resources res, CharSequence text) {
 
+        return Html.fromHtml(res.getString(R.string.rate_points, text));
+    }
 
 }

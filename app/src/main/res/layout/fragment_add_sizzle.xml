@@ -82,7 +82,7 @@
                 android:animateLayoutChanges="true">
 
                 <TextView
-                    android:id="@+id/addressTv"
+                    android:id="@+id/ratingHintTv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="40dp"
@@ -116,7 +116,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/addressTv" />
+                    app:layout_constraintTop_toBottomOf="@+id/ratingHintTv" />
 
                 <EditText
                     android:id="@+id/addressEditText"

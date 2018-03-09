@@ -112,6 +112,15 @@
     <string name="comments">Comments</string>
     <string name="snag_score">Snag Score</string>
     <string name="commentString">Comment</string>
+    <string name="rate_points">
+      <![CDATA[
+        <b>%1$s</b>/5
+    ]]>
+    </string>
+
+    <string name="rating_title">Was this snag worthy?</string>
+    <string name="rating_hint">drag over each ingredient to give it a score</string>
+    <string name="done">Done</string>
 
 
     <!--    Rate   -->

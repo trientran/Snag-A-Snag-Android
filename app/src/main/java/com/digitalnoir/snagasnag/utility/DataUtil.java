@@ -175,7 +175,7 @@ public class DataUtil {
     }
 
     /**
-     * Create comment. Comment object needs to be created using these properties: userId, sizzleId and commentString;
+     * Create comment. Comment object needs to be created using this constructor: userId, sizzleId...;
      */
     public static void createNewComment(WeakReference<Context> mWeakContext, Comment comment) {
 
@@ -201,11 +201,32 @@ public class DataUtil {
     }
 
     /**
-     * Create rating
+     * Create rating. Rating object needs to be created using this constructor: userId, sizzleId...;
      */
-    public static void createNewRating(Context context, int userId, int sizzleId, String sausage,
-                                       String bread, String onion, String sauce) {
+    public static void createNewRating(WeakReference<Context> mWeakContext, Rating rating) {
 
+        String url = SIZZLE_BASE_URL + CREATE_RATING_URL_TAG;
+
+        try {
+            HttpClientUpStream client = new HttpClientUpStream(url);
+            client.connectForMultipart();
+            client.addFormPart("unique_key", UNIQUE_KEY);
+            client.addFormPart("user_id", String.valueOf(rating.getUserId()));
+            client.addFormPart("sizzle_id", String.valueOf(rating.getSizzleId()));
+            client.addFormPart("sausage", rating.getSausage());
+            client.addFormPart("bread", rating.getBread());
+            client.addFormPart("onion", rating.getOnion());
+            client.addFormPart("sauce", rating.getSauce());
+            client.finishMultipart();
+
+            String response = client.getResponse();
+            // save Comment As Preference to trigger MapsActivity refreshing data
+            saveRatingAsPreference(mWeakContext, rating.getSausage());
+            LogUtil.debug(LOG_TAG, response);
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     /**
@@ -406,6 +427,19 @@ public class DataUtil {
         SharedPreferences.Editor editor = mSettings.edit();
 
         editor.putString("comment", newComment);
+        editor.apply(); // apply is async
+        // editor.commit(); // commit is synchronous
+    }
+
+    /**
+     * save comment in SharedPreferences
+     */
+    private static void saveRatingAsPreference(WeakReference<Context> context, String sausageRate) {
+
+        SharedPreferences mSettings = PreferenceManager.getDefaultSharedPreferences(context.get());
+        SharedPreferences.Editor editor = mSettings.edit();
+
+        editor.putString("sausage", sausageRate);
         editor.apply(); // apply is async
         // editor.commit(); // commit is synchronous
     }

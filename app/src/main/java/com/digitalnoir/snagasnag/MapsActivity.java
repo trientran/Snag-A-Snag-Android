@@ -341,11 +341,7 @@ public class MapsActivity extends AppCompatActivity implements
         mAddBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    formatCommentDateTime("2018-03-08 01:39:20");
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+
                 if (mAddSizzleAlertBtn.getVisibility() == View.GONE) {
                     // refresh the map and loaded data first
                     onRefreshBtnClick();
@@ -720,6 +716,12 @@ public class MapsActivity extends AppCompatActivity implements
 
         mRefreshBtn.setVisibility(View.GONE);
         mMyLocationBtn.setVisibility(View.GONE);
+
+        if (mAddSizzleAlertBtn.getVisibility() == View.VISIBLE) {
+
+            mAddBtn.setImageResource(R.drawable.ic_add_snag);
+            mAddSizzleAlertBtn.setVisibility(View.GONE);
+        }
 
         ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
         marginParams.setMargins(0, 100, 0, 0);

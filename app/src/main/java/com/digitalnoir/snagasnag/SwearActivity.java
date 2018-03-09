@@ -56,4 +56,6 @@ public class SwearActivity extends AppCompatActivity {
 
         return Html.fromHtml(res.getString(R.string.swear_body, username));
     }
+
+
 }

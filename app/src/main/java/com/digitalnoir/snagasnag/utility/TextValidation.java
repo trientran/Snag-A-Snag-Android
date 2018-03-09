@@ -2,6 +2,7 @@ package com.digitalnoir.snagasnag.utility;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -10,6 +11,7 @@ import com.digitalnoir.snagasnag.R;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -78,16 +80,18 @@ public class TextValidation {
 
     public static String formatCommentDateTime(String datetime) throws ParseException {
 
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         Date date = fmt.parse(datetime);
-        LogUtil.debug("troe", String.valueOf(date));
 
-        SimpleDateFormat fmtOut = new SimpleDateFormat("h:mm a dd MMM", Locale.ENGLISH);
-        //return fmtOut.format(date);
-        String dateString = fmtOut.format(date);
-        LogUtil.debug("troe", dateString);
+        // manually with datetime pattern
+        /*SimpleDateFormat fmtOut = new SimpleDateFormat("h:mm a dd MMM", Locale.getDefault());
+        String dateString = fmtOut.format(date);*/
 
-        return dateString;
+        // automatically display Facebook-like datetime value (eg 20 mins ago, yesterday...)
+        String niceDateStr = String.valueOf(DateUtils.getRelativeTimeSpanString(date.getTime() , Calendar.getInstance().getTimeInMillis(), DateUtils.MINUTE_IN_MILLIS));
+        LogUtil.debug("troe", niceDateStr);
+
+        return niceDateStr;
     }
 
 

@@ -26,14 +26,13 @@ public class Rating implements Parcelable{
         this.aggregateRating = aggregateRating;
     }
 
-    public Rating(int userId, int sizzleId, String sausage, String bread, String onion, String sauce, String aggregateRating) {
+    public Rating(int userId, int sizzleId, String sausage, String bread, String onion, String sauce) {
         this.userId = userId;
         this.sizzleId = sizzleId;
         this.sausage = sausage;
         this.bread = bread;
         this.onion = onion;
         this.sauce = sauce;
-        this.aggregateRating = aggregateRating;
     }
 
     /**

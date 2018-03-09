@@ -90,14 +90,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
         Comment comment = mComments.get(position);
 
 
+        String formattedDatetime = "";
         try {
-            formatCommentDateTime(comment.getDate());
+            formattedDatetime = formatCommentDateTime(comment.getDate());
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
         commentAdapterViewHolder.usernameTv.setText(comment.getUsername());
-        commentAdapterViewHolder.timeLapseTv.setText(comment.getDate());
+        commentAdapterViewHolder.timeLapseTv.setText(formattedDatetime);
         commentAdapterViewHolder.commentTv.setText(comment.getCommentString());
     }
 
@@ -132,7 +133,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
         notifyItemInserted(mComments.size() - 1);
 
         // make recycler view scroll to the last created comment
-        recyclerView.smoothScrollToPosition(mComments.size());
+        recyclerView.smoothScrollToPosition(mComments.size()-1);
     }
 
     /**
