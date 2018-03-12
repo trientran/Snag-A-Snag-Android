@@ -38,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.digitalnoir.snagasnag.fragment.AddSizzleFragment;
+import com.digitalnoir.snagasnag.fragment.RatingFragment;
 import com.digitalnoir.snagasnag.fragment.SizzleDetailFragment;
 import com.digitalnoir.snagasnag.model.Sizzle;
 import com.digitalnoir.snagasnag.utility.LogUtil;
@@ -72,7 +73,6 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -80,7 +80,6 @@ import java.util.Locale;
 
 import static com.digitalnoir.snagasnag.utility.DataUtil.DISPLAY_SIZZLE_URL_TAG;
 import static com.digitalnoir.snagasnag.utility.DataUtil.SIZZLE_BASE_URL;
-import static com.digitalnoir.snagasnag.utility.TextValidation.formatCommentDateTime;
 
 public class MapsActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<List<Sizzle>>,
@@ -92,7 +91,8 @@ public class MapsActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
         AddSizzleFragment.OnAddSizzleButtonsClickListener,
-        SizzleDetailFragment.OnSizzleDetailButtonsClickListener{
+        SizzleDetailFragment.OnSizzleDetailButtonsClickListener,
+        RatingFragment.OnRatingButtonsClickListener{
 
     /**
      * Tag for log messages
@@ -596,8 +596,6 @@ public class MapsActivity extends AppCompatActivity implements
         }
 
         int sizzleId = 0;
-        String sizzleName = "";
-        String sizzleAddress = "";
 
         Sizzle sizzle = (Sizzle)marker.getTag();
         if (sizzle != null) {
@@ -619,10 +617,6 @@ public class MapsActivity extends AppCompatActivity implements
                 LogUtil.debug("trienSizzleId2", String.valueOf(sizzleId));
 
             }
-
-            // attach sizzle Id, name, and address to bundle (retrieve them all from SizzleDetailFragment)
-            sizzleName = sizzle.getName();
-            sizzleAddress = sizzle.getAddress();
 
             // send selected address to AddSizzleFragment
             Bundle bundle = new Bundle();
@@ -1207,9 +1201,23 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onRateBtnClick() {
-        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
-        marginParams.setMargins(0, 450, 0, 0);
+    public void onRateBtnClick(Sizzle selectedSizzle) {
+
+        // Creating a new SizzleDetailFragment object
+        RatingFragment ratingFragment = new RatingFragment();
+        if(mSavedInstanceState == null) {
+
+            // Add the fragment to its container using a transaction
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, ratingFragment)
+                    .commit();
+        }
+
+            // send selected address to AddSizzleFragment
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_SELECTED_SIZZLE, selectedSizzle);
+            ratingFragment.setArguments(bundle);
+
     }
 
     @Override
@@ -1242,4 +1250,26 @@ public class MapsActivity extends AppCompatActivity implements
 
     }
 
+    @Override
+    public void onRatingCloseBtnClick() {
+
+        // remove sizzleDetailFragment
+        RatingFragment ratingFragment = (RatingFragment) getFragmentManager()
+                .findFragmentById(R.id.fragmentContainer);
+        getFragmentManager().beginTransaction()
+                .remove(ratingFragment).commit();
+
+        // enable mRefreshBtn and mMyLocationBtn
+        mRefreshBtn.setVisibility(View.VISIBLE);
+        mMyLocationBtn.setVisibility(View.VISIBLE);
+
+        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
+        marginParams.setMargins(0, 450, 0, 0);
+    }
+
+    @Override
+    public void onDoneBtnClick() {
+
+        onRatingCloseBtnClick();
+    }
 }

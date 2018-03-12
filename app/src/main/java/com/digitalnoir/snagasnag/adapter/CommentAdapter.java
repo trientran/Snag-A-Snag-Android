@@ -17,6 +17,7 @@ package com.digitalnoir.snagasnag.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -122,18 +123,25 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
      * @param newComments the new comment list to use as CommentAdapter's data source
      */
     public void swapCommentData(List<Comment> newComments) {
+
         mComments = newComments;
         notifyDataSetChanged();
     }
 
-    public void onChildAdded(Comment newComment, RecyclerView recyclerView) {
+    public void onChildAdded(Comment newComment, final RecyclerView recyclerView, final NestedScrollView nestedScrollView) {
 
         // add new comment and notify the recycler view to insert the new item to last position
         mComments.add(newComment);
-        notifyItemInserted(mComments.size() - 1);
+        notifyDataSetChanged();
 
-        // make recycler view scroll to the last created comment
-        recyclerView.smoothScrollToPosition(mComments.size()-1);
+        // scroll to top of RecyclerView (where newest comment is)
+        nestedScrollView.post(new Runnable() {
+
+            @Override
+            public void run() {
+                nestedScrollView.smoothScrollTo(0, recyclerView.getTop());
+            }
+        });
     }
 
     /**

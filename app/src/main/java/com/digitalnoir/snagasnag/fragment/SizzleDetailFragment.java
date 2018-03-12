@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -18,9 +19,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.adapter.CommentAdapter;
 import com.digitalnoir.snagasnag.model.Comment;
@@ -36,9 +40,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.CropSquareTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
+import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_SIZZLE;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
@@ -64,10 +71,7 @@ public class SizzleDetailFragment extends Fragment {
 
     private EditText commentEditText;
 
-
     private Button rateBtn;
-
-    private int sizzleId;
 
     // all about comments
     private Button commentBtn;
@@ -76,6 +80,9 @@ public class SizzleDetailFragment extends Fragment {
     private List<Comment> commentList;
     LinearLayoutManager layoutManager;
 
+    NestedScrollView nestedScrollView;
+
+    Sizzle sizzle;
     Rating rating;
 
     // default constructor
@@ -91,7 +98,7 @@ public class SizzleDetailFragment extends Fragment {
 
         void onSizzleDetailCloseBtnClick();
 
-        void onRateBtnClick();
+        void onRateBtnClick(Sizzle sizzle);
     }
 
     @Override
@@ -112,6 +119,8 @@ public class SizzleDetailFragment extends Fragment {
                 container, false);
 
         commentList = new ArrayList<>();
+
+        nestedScrollView = (NestedScrollView) view.findViewById(R.id.scrollView);
 
         snagAvatar = (ImageView)  view.findViewById(R.id.snagAvatar);
         sizzleTitle = (TextView) view.findViewById(R.id.sizzleTitle);
@@ -172,8 +181,9 @@ public class SizzleDetailFragment extends Fragment {
         rateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
 
+                // pass sizzle object to MapsActivity
+                mCallback.onRateBtnClick(sizzle);
             }
         });
 
@@ -185,6 +195,7 @@ public class SizzleDetailFragment extends Fragment {
             }
         });
 
+        // make mRecyclerView not scrollable so it scroll along with it container parent
         mRecyclerView.setNestedScrollingEnabled(false);
         return view;
     }
@@ -201,7 +212,7 @@ public class SizzleDetailFragment extends Fragment {
         // If there is a network connection and text validation is ok then send a request to create comment
         if (isInternetConnected(getActivity()) && newCommentString != null) {
 
-            Comment newComment = new Comment(userId, sizzleId, newCommentString);
+            Comment newComment = new Comment(userId, sizzle.getSizzleId(), newCommentString);
 
             // if userId exist, then go straight to creating a new comment
             if (userId != 0) {
@@ -211,16 +222,14 @@ public class SizzleDetailFragment extends Fragment {
                 commentCreator.execute();
 
                 // add the new comment to Recycler view
-                SimpleDateFormat fmtOut = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                SimpleDateFormat fmtOut = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK);
                 Date currentTime = Calendar.getInstance().getTime();
                 String currentDatetimeString = fmtOut.format(currentTime);
                 newComment.setDate(currentDatetimeString);
 
                 newComment.setUsername(userName);
 
-                commentAdapter.onChildAdded(newComment, mRecyclerView);
-
-
+                commentAdapter.onChildAdded(newComment, mRecyclerView, nestedScrollView);
 
                 LogUtil.debug("trienTime", currentDatetimeString);
             }
@@ -241,44 +250,47 @@ public class SizzleDetailFragment extends Fragment {
         if (bundle != null) {
 
             // retrieve sizzle object
-            Sizzle sizzle = bundle.getParcelable(EXTRA_SELECTED_SIZZLE);
+            sizzle = bundle.getParcelable(EXTRA_SELECTED_SIZZLE);
 
-            // retrieve sizzle id
-            sizzleId = sizzle != null ? sizzle.getSizzleId() : 0;
-            LogUtil.debug("trienSizzleIdFragment", String.valueOf(sizzle.getSizzleId()));
+            if (sizzle != null) {
+                // Log retrieval of sizzle id
+                LogUtil.debug("trienSizzleIdFragment", String.valueOf(sizzle.getSizzleId()));
 
-            // get and set address for addressEditText
-            if (sizzle.getPhotoUrl() != null) {
+                // get and set address for addressEditText
+                if (sizzle.getPhotoUrl() != null) {
 
-                Glide.with(this).load(sizzle.getPhotoUrl())
-                        .apply(bitmapTransform(new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL)))
-                        .into(snagAvatar);
+                    MultiTransformation multi = new MultiTransformation(
+                            new CropSquareTransformation(),
+                            new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL));
+                    Glide.with(this).load(sizzle.getPhotoUrl())
+                            .apply(bitmapTransform(multi))
+                            .into(snagAvatar);
+                }
+
+                sizzleTitle.setText(sizzle.getName());
+                addressTv.setText(sizzle.getAddress());
+
+                // get and populate rating details
+                rating = sizzle.getRating();
+
+                Spanned sausageScore = formatText(getResources(),String.valueOf(rating.getSausage()));
+                Spanned breadScore = formatText(getResources(),String.valueOf(rating.getBread()));
+                Spanned onionScore = formatText(getResources(),String.valueOf(rating.getOnion()));
+                Spanned sauceScore = formatText(getResources(),String.valueOf(rating.getSauce()));
+                Spanned totalScore = formatText(getResources(),String.valueOf(rating.getAggregateRating()));
+
+                sausageScoreTv.setText(sausageScore);
+                breadScoreTv.setText(breadScore);
+                onionScoreTv.setText(onionScore);
+                sauceScoreTv.setText(sauceScore);
+                totalScoreTv.setText(totalScore);
+
+                // get and populate comments
+                commentList = sizzle.getComments();
+                commentAdapter.swapCommentData(commentList);
+
+                LogUtil.debug("triencom", commentList.toString()); // retrieve sizzle id
             }
-
-            sizzleTitle.setText(sizzle.getName());
-            addressTv.setText(sizzle.getAddress());
-
-            // get and populate rating details
-            rating = sizzle.getRating();
-
-            Spanned sausageScore = formatText(getResources(),String.valueOf(rating.getSausage()));
-            Spanned breadScore = formatText(getResources(),String.valueOf(rating.getBread()));
-            Spanned onionScore = formatText(getResources(),String.valueOf(rating.getOnion()));
-            Spanned sauceScore = formatText(getResources(),String.valueOf(rating.getSauce()));
-            Spanned totalScore = formatText(getResources(),String.valueOf(rating.getAggregateRating()));
-
-            sausageScoreTv.setText(sausageScore);
-            breadScoreTv.setText(breadScore);
-            onionScoreTv.setText(onionScore);
-            sauceScoreTv.setText(sauceScore);
-            totalScoreTv.setText(totalScore);
-
-            // get and populate comments
-            commentList = sizzle.getComments();
-            commentAdapter.swapCommentData(commentList);
-
-            LogUtil.debug("triencom", commentList.toString());
-
         }
     }
 

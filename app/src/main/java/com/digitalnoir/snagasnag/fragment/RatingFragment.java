@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.adapter.CommentAdapter;
 import com.digitalnoir.snagasnag.model.Comment;
@@ -40,6 +42,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import jp.wasabeef.glide.transformations.CropSquareTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -69,7 +72,7 @@ public class RatingFragment extends Fragment {
     double breadScore = 1;
     double onionScore =1;
     double sauceScore =1;
-    double totalScore =1;
+    double totalScore =5;
 
     private TextView totalScoreTv;
 
@@ -77,6 +80,7 @@ public class RatingFragment extends Fragment {
 
     private int sizzleId;
 
+    Sizzle sizzle;
     Rating rating;
 
     // default constructor
@@ -109,7 +113,7 @@ public class RatingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sizzle_details,
+        View view = inflater.inflate(R.layout.fragment_rating,
                 container, false);
 
         closeBtn = (ImageButton) view.findViewById(R.id.closeBtn);
@@ -130,7 +134,9 @@ public class RatingFragment extends Fragment {
                 sausageScore = ratingBar.getRating();
 
                 totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
+                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScoreTv.setText(totalScoreSpanned);
+                //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
             }
         });
         breadRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
@@ -140,7 +146,10 @@ public class RatingFragment extends Fragment {
                 breadScore = ratingBar.getRating();
 
                 totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
+                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScoreTv.setText(totalScoreSpanned);
+                //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
+                LogUtil.debug("trienBreadScore", String.valueOf(breadScore));
             }
         });
         onionRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
@@ -150,7 +159,9 @@ public class RatingFragment extends Fragment {
                 onionScore = ratingBar.getRating();
 
                 totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
+                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScoreTv.setText(totalScoreSpanned);
+                //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
             }
         });
         sauceRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
@@ -160,17 +171,19 @@ public class RatingFragment extends Fragment {
                 sauceScore = ratingBar.getRating();
 
                 totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
+                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScoreTv.setText(totalScoreSpanned);
+                //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
             }
         });
 
-        doneBtn = (Button) view.findViewById(R.id.rateBtn);
+        doneBtn = (Button) view.findViewById(R.id.doneBtn);
 
         doneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
 
+                addNewRating();
             }
         });
 
@@ -190,12 +203,17 @@ public class RatingFragment extends Fragment {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         int userId = prefs.getInt("userId", 0);
 
-
-
-       /* // If there is a network connection and text validation is ok then send a request to create comment
+        // If there is a network connection and text validation is ok then send a request to create comment
         if (isInternetConnected(getActivity())) {
 
-            Rating newRating = new Rating(userId, sizzleId, sausageScore, breadScore,onionScore, sauceScore);
+            Rating newRating = new Rating(
+                    userId, sizzleId,
+                    String.valueOf(sausageScore),
+                    String.valueOf(breadScore),
+                    String.valueOf(onionScore),
+                    String.valueOf(sauceScore));
+            LogUtil.debug("trienScore", String.valueOf(sausageScore));
+            LogUtil.debug("trienScore", String.valueOf(breadScore));
 
             // if userId exist, then go straight to creating a new comment
             if (userId != 0) {
@@ -203,11 +221,12 @@ public class RatingFragment extends Fragment {
                 // send a request to web service
                 RatingCreator ratingCreator = new RatingCreator(getActivity(), newRating);
                 ratingCreator.execute();
+                mCallback.onDoneBtnClick();
 
             } else {
                 LogUtil.debug("triensharedUId", String.valueOf(userId));
             }
-        }*/
+        }
 
     }
 
@@ -217,45 +236,27 @@ public class RatingFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
 
-            /*// retrieve sizzle object
-            Sizzle sizzle = bundle.getParcelable(EXTRA_SELECTED_SIZZLE);
+            // retrieve sizzle object
+            sizzle = bundle.getParcelable(EXTRA_SELECTED_SIZZLE);
 
-            // retrieve sizzle id
-            sizzleId = sizzle != null ? sizzle.getSizzleId() : 0;
-            LogUtil.debug("trienSizzleIdFragment", String.valueOf(sizzle.getSizzleId()));
+            if (sizzle != null) {
+                // Log retrieval of sizzle id
+                LogUtil.debug("trienSizzleIdFragment", String.valueOf(sizzle.getSizzleId()));
 
-            // get and set address for addressEditText
-            if (sizzle.getPhotoUrl() != null) {
+                // get and set address for addressEditText
+                if (sizzle.getPhotoUrl() != null) {
 
-                Glide.with(this).load(sizzle.getPhotoUrl())
-                        .apply(bitmapTransform(new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL)))
-                        .into(snagAvatar);
+                    MultiTransformation multi = new MultiTransformation(
+                            new CropSquareTransformation(),
+                            new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL));
+                    Glide.with(this).load(sizzle.getPhotoUrl())
+                            .apply(bitmapTransform(multi))
+                            .into(snagAvatar);
+                }
+
+                sizzleTitle.setText(sizzle.getName());
+
             }
-
-            sizzleTitle.setText(sizzle.getName());
-            addressTv.setText(sizzle.getAddress());
-
-            // get and populate rating details
-            rating = sizzle.getRating();
-
-            Spanned sausageScore = formatText(getResources(), String.valueOf(rating.getSausage()));
-            Spanned breadScore = formatText(getResources(), String.valueOf(rating.getBread()));
-            Spanned onionScore = formatText(getResources(), String.valueOf(rating.getOnion()));
-            Spanned sauceScore = formatText(getResources(), String.valueOf(rating.getSauce()));
-            Spanned totalScore = formatText(getResources(), String.valueOf(rating.getAggregateRating()));
-
-            sausageScoreTv.setText(sausageScore);
-            breadScoreTv.setText(breadScore);
-            onionScoreTv.setText(onionScore);
-            sauceScoreTv.setText(sauceScore);
-            totalScoreTv.setText(totalScore);
-
-            // get and populate comments
-            commentList = sizzle.getComments();
-            commentAdapter.swapCommentData(commentList);
-
-            LogUtil.debug("triencom", commentList.toString());
-*/
         }
     }
 
