@@ -222,6 +222,15 @@ public class DataUtil {
             String response = client.getResponse();
             // save Comment As Preference to trigger MapsActivity refreshing data
             saveRatingAsPreference(mWeakContext, rating.getSausage());
+
+            LogUtil.debug(LOG_TAG, UNIQUE_KEY);
+            LogUtil.debug(LOG_TAG, String.valueOf(rating.getUserId()));
+            LogUtil.debug(LOG_TAG, String.valueOf(rating.getSizzleId()));
+            LogUtil.debug(LOG_TAG, rating.getSausage());
+            LogUtil.debug(LOG_TAG, rating.getBread());
+            LogUtil.debug(LOG_TAG, rating.getOnion());
+            LogUtil.debug(LOG_TAG, rating.getSauce());
+
             LogUtil.debug(LOG_TAG, response);
 
         } catch (Throwable t) {

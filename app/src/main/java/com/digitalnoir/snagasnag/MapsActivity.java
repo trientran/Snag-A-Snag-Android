@@ -3,6 +3,8 @@ package com.digitalnoir.snagasnag;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -92,7 +94,7 @@ public class MapsActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback,
         AddSizzleFragment.OnAddSizzleButtonsClickListener,
         SizzleDetailFragment.OnSizzleDetailButtonsClickListener,
-        RatingFragment.OnRatingButtonsClickListener{
+        RatingFragment.OnRatingButtonsClickListener {
 
     /**
      * Tag for log messages
@@ -279,6 +281,8 @@ public class MapsActivity extends AppCompatActivity implements
      */
     String mSelectedAddress = null;
 
+    Fragment selectedFragment;
+
     private Bundle mSavedInstanceState;
 
     @Override
@@ -319,7 +323,6 @@ public class MapsActivity extends AppCompatActivity implements
 
             }
         });
-
 
 
         mAddBtn = (ImageButton) findViewById(R.id.addBtn);
@@ -492,12 +495,12 @@ public class MapsActivity extends AppCompatActivity implements
         }*/
         //if map doesn't have markers, add markers to map
         if (this.markerOptions != null && !this.markerOptions.isEmpty()) {
-        for (int i = 0; i < markerOptions.size(); i++) {
+            for (int i = 0; i < markerOptions.size(); i++) {
 
-            this.mMap.addMarker(markerOptions.get(i)).setTag(mSizzles.get(i));
+                this.mMap.addMarker(markerOptions.get(i)).setTag(mSizzles.get(i));
+            }
+
         }
-
-                }
     }
 
     @Override
@@ -570,7 +573,7 @@ public class MapsActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<List<Sizzle>> loader) {
         // clear sizzle list
-         mSizzles = new ArrayList<>();
+        mSizzles = new ArrayList<>();
     }
 
     public void onRefreshBtnClick() {
@@ -587,17 +590,21 @@ public class MapsActivity extends AppCompatActivity implements
 
         // Creating a new SizzleDetailFragment object
         SizzleDetailFragment sizzleDetailFragment = new SizzleDetailFragment();
-        if(mSavedInstanceState == null) {
+
+        if (mSavedInstanceState == null) {
 
             // Add the fragment to its container using a transaction
             getFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, sizzleDetailFragment)
+                    .replace(R.id.fragmentContainer, sizzleDetailFragment, "sizzleDetailFragment")
+                    .addToBackStack(null)
                     .commit();
+
+            selectedFragment = sizzleDetailFragment;
         }
 
         int sizzleId = 0;
 
-        Sizzle sizzle = (Sizzle)marker.getTag();
+        Sizzle sizzle = (Sizzle) marker.getTag();
         if (sizzle != null) {
 
             // if users click a newly created marker then get the selected sizzle's sizzleId from SharedPreferences
@@ -656,12 +663,15 @@ public class MapsActivity extends AppCompatActivity implements
 
             // Creating a new head fragment
             AddSizzleFragment addSizzleFragment = new AddSizzleFragment();
-            if(mSavedInstanceState == null) {
+            if (mSavedInstanceState == null) {
 
                 // Add the fragment to its container using a transaction
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentContainer, addSizzleFragment)
+                        .replace(R.id.fragmentContainer, addSizzleFragment, "addSizzleFragment")
+                        .addToBackStack(null)
                         .commit();
+
+                selectedFragment = addSizzleFragment;
             }
 
             Double lati = (latLng.latitude);
@@ -728,10 +738,10 @@ public class MapsActivity extends AppCompatActivity implements
 
         Marker newMarker;
 
-            newMarker  = mMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .title("selected location")
-                    .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
+        newMarker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title("selected location")
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin_yellow))));
 
         return newMarker;
     }
@@ -743,13 +753,13 @@ public class MapsActivity extends AppCompatActivity implements
 
         Marker newMarker;
 
-            newMarker  =  mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
-                    .title(NEW_SIZZLE_TITLE_TAG)
-                    .snippet(sizzle.getAddress())
-                    .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin))));
+        newMarker = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(Double.valueOf(sizzle.getLatitude()), Double.valueOf(sizzle.getLongitude())))
+                .title(NEW_SIZZLE_TITLE_TAG)
+                .snippet(sizzle.getAddress())
+                .icon(BitmapDescriptorFactory.fromBitmap(resizeBitmap(R.drawable.ic_snag_pin))));
 
-            newMarker.setTag(sizzle);
+        newMarker.setTag(sizzle);
 
         return newMarker;
     }
@@ -1198,6 +1208,8 @@ public class MapsActivity extends AppCompatActivity implements
         ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
         marginParams.setMargins(0, 450, 0, 0);
 
+        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
     }
 
     @Override
@@ -1205,18 +1217,21 @@ public class MapsActivity extends AppCompatActivity implements
 
         // Creating a new SizzleDetailFragment object
         RatingFragment ratingFragment = new RatingFragment();
-        if(mSavedInstanceState == null) {
+        if (mSavedInstanceState == null) {
 
             // Add the fragment to its container using a transaction
             getFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, ratingFragment)
+                    .replace(R.id.fragmentContainer, ratingFragment, "ratingFragment")
+                    .addToBackStack(null)
                     .commit();
+
+            selectedFragment = ratingFragment;
         }
 
-            // send selected address to AddSizzleFragment
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(EXTRA_SELECTED_SIZZLE, selectedSizzle);
-            ratingFragment.setArguments(bundle);
+        // send selected address to AddSizzleFragment
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EXTRA_SELECTED_SIZZLE, selectedSizzle);
+        ratingFragment.setArguments(bundle);
 
     }
 
@@ -1237,6 +1252,8 @@ public class MapsActivity extends AppCompatActivity implements
         for (Marker marker : newTempMarkers) {
             marker.remove();
         }
+
+        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     @Override
@@ -1246,7 +1263,7 @@ public class MapsActivity extends AppCompatActivity implements
         onAddSizzleCloseBtnClick();
 
         // create a new permanent marker on the selected location
-       // addPermanentMarker(sizzle);
+        // addPermanentMarker(sizzle);
 
     }
 
@@ -1265,11 +1282,50 @@ public class MapsActivity extends AppCompatActivity implements
 
         ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) fragmentContainer.getLayoutParams();
         marginParams.setMargins(0, 450, 0, 0);
+
+        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     @Override
     public void onDoneBtnClick() {
 
         onRatingCloseBtnClick();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+
+        AddSizzleFragment addSizzleFragment = (AddSizzleFragment) getFragmentManager()
+                .findFragmentByTag("addSizzleFragment");
+        SizzleDetailFragment sizzleDetailFragment = (SizzleDetailFragment) getFragmentManager()
+                .findFragmentByTag("sizzleDetailFragment");
+        RatingFragment ratingFragment = (RatingFragment) getFragmentManager()
+                .findFragmentByTag("ratingFragment");
+
+        if (selectedFragment.equals(addSizzleFragment)) {
+
+            onAddSizzleCloseBtnClick();
+            LogUtil.debug("fragmentTag", addSizzleFragment.getTag());
+
+        } else if (selectedFragment.equals(sizzleDetailFragment)) {
+
+            onSizzleDetailCloseBtnClick();
+            LogUtil.debug("fragmentTag", sizzleDetailFragment.getTag());
+
+        } else if (selectedFragment.equals(ratingFragment)) {
+
+            super.onBackPressed();
+            selectedFragment = sizzleDetailFragment;
+
+            LogUtil.debug("fragmentTag", sizzleDetailFragment.getTag());
+
+        } else {
+            // handle by activity
+            super.onBackPressed();
+            LogUtil.debug("fragmentTag", "other");
+        }
+
+
     }
 }

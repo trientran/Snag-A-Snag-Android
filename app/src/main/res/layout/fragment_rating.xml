@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- set clickable and focusable to true to limit clickable area to only this fragment (not other
+fragment or layer underneath-->
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -71,7 +74,8 @@
             app:layout_constraintDimensionRatio="w,1:1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_snag_avatar" />
+            app:srcCompat="@drawable/ic_snag_avatar"
+            android:layout_marginLeft="24dp" />
 
         <TextView
             android:id="@+id/sizzleTitle"
@@ -126,7 +130,9 @@
             android:layout_marginTop="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ratingHintTv">
+            app:layout_constraintTop_toBottomOf="@+id/ratingHintTv"
+            android:layout_marginRight="16dp"
+            android:layout_marginLeft="24dp">
 
             <RatingBar
                 android:id="@+id/sausageRatingBar"
@@ -181,7 +187,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_end="259dp" />
+                app:layout_constraintGuide_percent="0.24709302" />
 
             <TextView
                 android:id="@+id/sausageTv"
@@ -191,7 +197,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/sausage"
                 app:layout_constraintBottom_toBottomOf="@+id/sausageRatingBar"
-                app:layout_constraintEnd_toStartOf="@+id/guidelineVertical"
+                app:layout_constraintEnd_toStartOf="@+id/sauceRatingBar"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/sausageRatingBar" />
 

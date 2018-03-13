@@ -19,12 +19,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.digitalnoir.snagasnag.R;
 import com.digitalnoir.snagasnag.adapter.CommentAdapter;
 import com.digitalnoir.snagasnag.model.Comment;
@@ -40,12 +38,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.CropSquareTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_SIZZLE;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
 import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
@@ -306,7 +302,11 @@ public class SizzleDetailFragment extends Fragment {
      */
     private static Spanned formatText(Resources res, CharSequence text) {
 
-        return Html.fromHtml(res.getString(R.string.rate_points, text));
+        if (text.toString().toLowerCase().equals("n/a")) {
+            return Html.fromHtml(res.getString(R.string.rate_points_n_a, text));
+        }
+
+        return Html.fromHtml(res.getString(R.string.rate_points_out_of_5, text));
     }
 
 }

@@ -41,14 +41,16 @@ import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithP
 
 public class AddSizzleFragment extends Fragment {
 
+    /** set a PERMISSION_REQUEST_CODE for permission to write images to internal memory. The number doesn't matter */
     public static final int PERMISSION_REQUEST_CODE = 1;
 
-    // PICK_IMAGE_ID for selecting image intent. The number doesn't matter
+    /** PICK_IMAGE_ID for selecting image intent. The number doesn't matter */
     private static final int PICK_IMAGE_ID = 234;
 
+    /** create a callback to interact with hosting activity  */
     private OnAddSizzleButtonsClickListener mCallback;
 
-
+    /** input text fields */
     private EditText sizzleNameEditText;
     private EditText addressEditText;
     private EditText detailEditText;
@@ -59,10 +61,11 @@ public class AddSizzleFragment extends Fragment {
     private ImageButton addPhotoSmallBtn;
     private TextView addPhotoTv;
 
+    /** define a LatLng object to fetch Latitude and Longitude from hosting activity and create a Sizzle afterward  */
     LatLng latLng = null;
     Bitmap bitmap = null;
 
-    // default constructor
+    /** default constructor */
     public AddSizzleFragment() {
     }
 
@@ -72,11 +75,17 @@ public class AddSizzleFragment extends Fragment {
      * activity correctly implements this interface.
      */
     public interface OnAddSizzleButtonsClickListener {
+
+        /** handle onclick event for Close button */
         void onAddSizzleCloseBtnClick();
 
+        /** handle onclick event for Snag It button */
         void onSnagItBtnClick(Sizzle sizzle);
     }
 
+    /**
+     * check if the activity correctly implements the inner typed interface
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -88,6 +97,9 @@ public class AddSizzleFragment extends Fragment {
         }
     }
 
+    /**
+     * set up views
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -149,6 +161,9 @@ public class AddSizzleFragment extends Fragment {
         return view;
     }
 
+    /**
+     *Create a sizzle object and push it to web server
+     */
     private void createSizzle() {
         // retrieve userId from SharedPreferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -179,20 +194,24 @@ public class AddSizzleFragment extends Fragment {
 
                 // close fragment and reload markers/data
                 mCallback.onSnagItBtnClick(newSizzle);
-            }
-
-            else {
+            } else {
                 LogUtil.debug("triensharedUId", String.valueOf(userId));
             }
         }
     }
 
+    /**
+     * add a photo with camera or internally stored images
+     */
     private void addCoverPhoto() {
         Intent chooseImageIntent = getPickImageIntent(getActivity());
         startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
         LogUtil.debug("addTrien", "aa");
     }
 
+    /**
+     * on Activity Created, get address and latlng values from bundle (passed from hosting activity
+     */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -209,7 +228,7 @@ public class AddSizzleFragment extends Fragment {
     }
 
     /**
-     * Storage permission.
+     * Request Storage permission.
      */
     private void requestPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -219,6 +238,9 @@ public class AddSizzleFragment extends Fragment {
         }
     }
 
+    /**
+     * check Storage permission.
+     */
     private boolean checkPermission() {
         int result = ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (result == PackageManager.PERMISSION_GRANTED) {
@@ -228,6 +250,9 @@ public class AddSizzleFragment extends Fragment {
         }
     }
 
+    /**
+     * responses on permission check.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -241,6 +266,9 @@ public class AddSizzleFragment extends Fragment {
         }
     }
 
+    /**
+     * get images after coming back from Camera/Image Choosing Intent.
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // if we call super.onActivityResult here, this would trigger onActivityResult() from hosting activity
@@ -258,6 +286,9 @@ public class AddSizzleFragment extends Fragment {
         }
     }
 
+    /**
+     * helper method to adapt the chosen photo to the image button.
+     */
     private void setBitmapToImageBtn(ImageButton imageBtn, Bitmap bitmap) {
         //Setting the Bitmap to ImageView
         BitmapDrawable bDrawable = new BitmapDrawable(getActivity().getResources(), bitmap);

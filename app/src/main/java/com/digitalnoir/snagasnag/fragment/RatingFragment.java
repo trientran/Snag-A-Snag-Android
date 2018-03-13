@@ -7,40 +7,24 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.digitalnoir.snagasnag.R;
-import com.digitalnoir.snagasnag.adapter.CommentAdapter;
-import com.digitalnoir.snagasnag.model.Comment;
 import com.digitalnoir.snagasnag.model.Rating;
 import com.digitalnoir.snagasnag.model.Sizzle;
-import com.digitalnoir.snagasnag.utility.CommentCreator;
 import com.digitalnoir.snagasnag.utility.LogUtil;
 import com.digitalnoir.snagasnag.utility.RatingCreator;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 import jp.wasabeef.glide.transformations.CropSquareTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -48,7 +32,6 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 import static com.digitalnoir.snagasnag.MapsActivity.EXTRA_SELECTED_SIZZLE;
 import static com.digitalnoir.snagasnag.utility.DataUtil.isInternetConnected;
-import static com.digitalnoir.snagasnag.utility.TextValidation.validateTextWithPattern;
 
 /**
  * RatingFragment controls Sizzle rating popup window (fragment_rating)
@@ -63,6 +46,7 @@ public class RatingFragment extends Fragment {
     private ImageView snagAvatar;
     private TextView sizzleTitle;
 
+
     private RatingBar sausageRatingBar;
     private RatingBar breadRatingBar;
     private RatingBar onionRatingBar;
@@ -70,9 +54,9 @@ public class RatingFragment extends Fragment {
 
     double sausageScore = 1;
     double breadScore = 1;
-    double onionScore =1;
-    double sauceScore =1;
-    double totalScore =5;
+    double onionScore = 1;
+    double sauceScore = 1;
+    double totalScore = 5;
 
     private TextView totalScoreTv;
 
@@ -120,58 +104,74 @@ public class RatingFragment extends Fragment {
         snagAvatar = (ImageView) view.findViewById(R.id.snagAvatar);
         sizzleTitle = (TextView) view.findViewById(R.id.sizzleTitle);
 
-          sausageRatingBar = (RatingBar) view.findViewById(R.id.sausageRatingBar);
-          breadRatingBar = (RatingBar) view.findViewById(R.id.breadRatingBar);
-          onionRatingBar = (RatingBar) view.findViewById(R.id.onionRatingBar);
-          sauceRatingBar = (RatingBar) view.findViewById(R.id.sauceRatingBar);
+        sausageRatingBar = (RatingBar) view.findViewById(R.id.sausageRatingBar);
+        breadRatingBar = (RatingBar) view.findViewById(R.id.breadRatingBar);
+        onionRatingBar = (RatingBar) view.findViewById(R.id.onionRatingBar);
+        sauceRatingBar = (RatingBar) view.findViewById(R.id.sauceRatingBar);
 
-          totalScoreTv = (TextView) view.findViewById(R.id.totalScoreTv);
+        totalScoreTv = (TextView) view.findViewById(R.id.totalScoreTv);
 
-        sausageRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
+        sausageRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
 
+                if (v < 1.0f) {
+                    ratingBar.setRating(1.0f);
+                }
+
                 sausageScore = ratingBar.getRating();
 
-                totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScore = (sausageScore + breadScore + onionScore + sauceScore) / 4;
+                Spanned totalScoreSpanned = formatText(getResources(), String.valueOf(totalScore));
                 totalScoreTv.setText(totalScoreSpanned);
                 //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
             }
         });
-        breadRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
+        breadRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
 
+                if (v < 1.0f) {
+                    ratingBar.setRating(1.0f);
+                }
+
                 breadScore = ratingBar.getRating();
 
-                totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScore = (sausageScore + breadScore + onionScore + sauceScore) / 4;
+                Spanned totalScoreSpanned = formatText(getResources(), String.valueOf(totalScore));
                 totalScoreTv.setText(totalScoreSpanned);
                 //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
                 LogUtil.debug("trienBreadScore", String.valueOf(breadScore));
             }
         });
-        onionRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
+        onionRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
 
+                if (v < 1.0f) {
+                    ratingBar.setRating(1.0f);
+                }
+
                 onionScore = ratingBar.getRating();
 
-                totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScore = (sausageScore + breadScore + onionScore + sauceScore) / 4;
+                Spanned totalScoreSpanned = formatText(getResources(), String.valueOf(totalScore));
                 totalScoreTv.setText(totalScoreSpanned);
                 //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
             }
         });
-        sauceRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener(){
+        sauceRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
 
+                if (v < 1.0f) {
+                    ratingBar.setRating(1.0f);
+                }
+
                 sauceScore = ratingBar.getRating();
 
-                totalScore = (sausageScore + breadScore +onionScore + sauceScore)/4;
-                Spanned totalScoreSpanned = formatText(getResources(),String.valueOf(totalScore));
+                totalScore = (sausageScore + breadScore + onionScore + sauceScore) / 4;
+                Spanned totalScoreSpanned = formatText(getResources(), String.valueOf(totalScore));
                 totalScoreTv.setText(totalScoreSpanned);
                 //totalScoreTv.setText(String.format(Locale.getDefault(),"%.2f", totalScore));
             }
@@ -214,6 +214,8 @@ public class RatingFragment extends Fragment {
                     String.valueOf(sauceScore));
             LogUtil.debug("trienScore", String.valueOf(sausageScore));
             LogUtil.debug("trienScore", String.valueOf(breadScore));
+            LogUtil.debug("trienScore", String.valueOf(onionScore));
+            LogUtil.debug("trienScore", String.valueOf(sauceScore));
 
             // if userId exist, then go straight to creating a new comment
             if (userId != 0) {
@@ -242,6 +244,8 @@ public class RatingFragment extends Fragment {
             if (sizzle != null) {
                 // Log retrieval of sizzle id
                 LogUtil.debug("trienSizzleIdFragment", String.valueOf(sizzle.getSizzleId()));
+
+                sizzleId = sizzle.getSizzleId();
 
                 // get and set address for addressEditText
                 if (sizzle.getPhotoUrl() != null) {
@@ -272,7 +276,11 @@ public class RatingFragment extends Fragment {
      */
     private static Spanned formatText(Resources res, CharSequence text) {
 
-        return Html.fromHtml(res.getString(R.string.rate_points, text));
+        if (text.toString().toLowerCase().equals("n/a")) {
+            return Html.fromHtml(res.getString(R.string.rate_points_n_a, text));
+        }
+
+        return Html.fromHtml(res.getString(R.string.rate_points_out_of_5, text));
     }
 
 }

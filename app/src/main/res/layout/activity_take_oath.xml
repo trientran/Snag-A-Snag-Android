@@ -13,11 +13,11 @@
         android:layout_height="70dp"
         android:background="@drawable/popup_bottom_grey"
         android:text="@string/take_the_oath"
+        android:textAlignment="center"
         android:textAppearance="@style/TitleTextStyle"
         android:textColor="@color/White"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -29,14 +29,14 @@
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:text="@string/oath_title"
-        android:textSize="18sp"
-        android:textColor="@color/black"
         android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/oath_title" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -63,12 +63,13 @@
         android:ems="10"
         android:hint="@string/hint_type_here"
         android:inputType="textCapWords"
+        android:maxLines="1"
+        android:paddingEnd="15dp"
         android:paddingLeft="15dp"
         android:paddingStart="15dp"
         android:textColor="@color/bottomGrey"
         android:textSize="16sp"
         android:textStyle="bold|italic"
-        android:maxLines="1"
         app:layout_constraintBottom_toTopOf="@+id/takeOathBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -81,12 +82,12 @@
         android:layout_marginBottom="30dp"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:text="@string/create_username_hint"
         android:textAlignment="center"
         android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/usernameInput"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="@string/create_username_hint" />
 
 </android.support.constraint.ConstraintLayout>

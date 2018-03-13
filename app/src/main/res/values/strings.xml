@@ -17,7 +17,7 @@
     <string name="permission_required_toast">Location permission is required for this feature.</string>
 
 
-    <!--   Toast message for Input Text validation   -->
+    <!--   Toast messages for Input Text validation   -->
     <string name="toast_text_empty">is empty</string>
     <string name="toast_username_lacking_snag">Username must contain the word snag</string>
     <string name="toast_invalid_character">shouldn\'t contain special character</string>
@@ -28,12 +28,12 @@
     <string name="comment_field_name">Comment</string>
 
 
-    <!--    Let's nag   -->
+    <!--    Screen: Let's nag   -->
     <string name="lets_snag">Let\'s snag</string>
     <string name="snag_a_snag">Snag-A-Snag</string>
 
 
-    <!--    Take the oath   -->
+    <!--    Screen: Take the oath screen  -->
     <string name="take_the_oath">Take the oath</string>
 
     <string name="oath_title">
@@ -59,8 +59,7 @@
     </string>
 
 
-
-    <!--    Swear   -->
+    <!--    Screen: Swear   -->
     <string name="i_do">I Do</string>
     <string name="swear_title">
         <![CDATA[
@@ -84,8 +83,7 @@
     </string>
 
 
-
-    <!--    Add sizzle   -->
+    <!--   Screen: Add sizzle   -->
     <string name="add_a_sizzle">Add A Sizzle</string>
     <string name="add_sizzle_note">The sizzle is marked at your location (You can move the marker around)</string>
     <string name="hint_sizzle_name">Sizzle name</string>
@@ -100,7 +98,7 @@
     <string name="toast_sizzle_detail_empty">Description is empty</string>
     <string name="pick_image_intent_text">Pick an image</string>
 
-    <!--    Sizzle details   -->
+    <!--    Screen: Sizzle details   -->
     <string name="sizzle_title">Hindmarsh Bunnings Sizzle</string>
     <string name="rate">Rate</string>
     <string name="sizzle_address">123 Hindmarsh Road, Hindmarsh SA 5002</string>
@@ -112,17 +110,22 @@
     <string name="comments">Comments</string>
     <string name="snag_score">Snag Score</string>
     <string name="commentString">Comment</string>
-    <string name="rate_points">
+    <string name="rate_points_out_of_5">
       <![CDATA[
         <b>%1$s</b>/5
     ]]>
     </string>
 
+    <string name="rate_points_n_a">
+      <![CDATA[
+        <b>%1$s</b>
+    ]]>
+    </string>
+
+
+    <!--    Screen: Rating   -->
     <string name="rating_title">Was this snag worthy?</string>
     <string name="rating_hint">drag over each ingredient to give it a score</string>
     <string name="done">Done</string>
-
-
-    <!--    Rate   -->
 
 </resources>

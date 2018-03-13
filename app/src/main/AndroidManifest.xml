@@ -10,10 +10,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-feature android:name="android.hardware.camera"
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
+    <!-- Main Activity -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -30,6 +33,7 @@
             </intent-filter>
         </activity>
 
+
         <activity
             android:name=".TakeOathActivity"
             android:parentActivityName=".LetsSnagActivity"
@@ -41,6 +45,7 @@
                 android:value=".LetsSnagActivity" />
         </activity>
 
+
         <activity
             android:name=".SwearActivity"
             android:parentActivityName=".TakeOathActivity">
@@ -50,6 +55,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".TakeOathActivity" />
         </activity>
+
 
         <activity
             android:name=".MapsActivity"
@@ -61,6 +67,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".LetsSnagActivity" />
         </activity>
+
 
         <!-- meta data tags for google play services -->
         <meta-data
@@ -78,7 +85,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
 
     </application>
 

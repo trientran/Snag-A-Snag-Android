@@ -10,7 +10,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- Style for title in some screens. -->
+    <!-- Style for title text in some screens. -->
     <style name="TitleTextStyle">
         <item name="android:textColor">@color/textColorDarkGrey</item>
         <item name="android:textStyle">bold</item>

@@ -41,6 +41,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
     /* The context we use to utility methods, app resources and layout inflaters */
     private final Context mContext;
 
+    /* The comment list we use to store all comments including newly added comments */
     private List<Comment> mComments = new ArrayList<>();
 
     /**
@@ -90,7 +91,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
         // fetch each comment and set text for each comment layout's  item
         Comment comment = mComments.get(position);
 
-
         String formattedDatetime = "";
         try {
             formattedDatetime = formatCommentDateTime(comment.getDate());
@@ -128,6 +128,10 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentA
         notifyDataSetChanged();
     }
 
+    /**
+     * Add a new comment to the recyclerView     *
+     * @param nestedScrollView: scroll to the top of recyclerView after adding a new comment
+     */
     public void onChildAdded(Comment newComment, final RecyclerView recyclerView, final NestedScrollView nestedScrollView) {
 
         // add new comment and notify the recycler view to insert the new item to last position
